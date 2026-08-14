@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VigilProctor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span>VigilProctor<small>Exam Monitoring System</small></div>
+      <div class="who"><span class="name">{{ name }}</span> · {{ candidate_id }} · <a href="{{ url_for('logout') }}">Sign Out</a></div>
+    </div>
+
+    <div class="stage">
+      <div class="panel card wide">
+        <p class="eyebrow">Candidate Dashboard</p>
+        <h1 class="title">Welcome {{ name.split(' ')[0] }}</h1>
+        <p class="subtitle">Start your Exam when you're Ready. Once Started, your Web Camera and Browser Tab Focus are Monitored Continuously until you End the Exam.</p>
+
+        {% if latest_session %}
+        <div class="readouts">
+          <div class="readout">
+            <div class="label">Last Session Status</div>
+            <div class="value">
+              {% if latest_session['status'] == 'Running' %}<span class="badge badge-running">Running</span>
+              {% elif latest_session['status'] == 'Paused' %}<span class="badge badge-paused">Paused</span>
+              {% else %}<span class="badge badge-completed">Completed</span>{% endif %}
+            </div>
+          </div>
+          <div class="readout">
+            <div class="label">Last Session Started</div>
+            <div class="value" style="font-size:13px;">
+              {{ datetime.fromisoformat(latest_session['start_time']).strftime("%d %b %Y") }}<br>
+              {{ datetime.fromisoformat(latest_session['start_time']).strftime("%I:%M:%S %p") }}
+            </div>
+          </div>
+          <div class="readout">
+            <div class="label">Absence Logged</div>
+            <div class="value accent">{{ latest_session['total_absence_duration'] or 0 }} seconds</div>
+          </div>
+        </div>
+        {% else %}
+        <div class="readouts">
+          <div class="readout">
+            <div class="label">Last Session Status</div>
+            <div class="value">
+              <span class="badge badge-completed">NA</span>
+            </div>
+          </div>
+          <div class="readout">
+            <div class="label">Last Session Started</div>
+            <div class="value">
+              <span class="badge badge-completed">NA</span>
+            </div>
+          </div>
+          <div class="readout">
+            <div class="label">Absence Logged</div>
+            <div class="value">
+              <span class="badge badge-completed">NA</span>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="action-list">
+          {% if latest_session and latest_session['status'] == 'Paused' %}
+            <a class="btn btn-primary" href="{{ url_for('resume_exam') }}">
+                Resume Monitoring Session
+            </a>
+          {% elif latest_session and latest_session['status'] == 'Running' %}
+            <a class="btn btn-primary" href="{{ url_for('exam') }}">
+                Continue Monitoring Session
+            </a>
+          {% else %}
+            <a class="btn btn-primary" href="{{ url_for('start_exam') }}">
+                Start Exam
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <footer class="legal">&copy; 2026 VigilProctor · Powered by Session-Audited SQLite & Haar-Cascade Detection Engine</footer>
+  </div>
+</body>
+</html>

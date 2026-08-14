@@ -1,0 +1,6 @@
+Flask
+opencv-python==4.10.0.84
+numpy
+Faker
+reportlab
+python-dotenv

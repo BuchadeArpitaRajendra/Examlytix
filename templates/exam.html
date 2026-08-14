@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VigilProctor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span>VigilProctor<small>Exam Monitoring System</small></div>
+      <div class="who"><span class="name">{{ name }}</span> · {{ candidate_id }} · session #{{ session_id }}</div>
+    </div>
+
+    <div class="stage">
+      <div class="exam-shell">
+        <div class="panel" style="padding:22px;">
+          <p class="eyebrow">Camera Feed</p>
+          <h1 class="title" style="font-size:20px;">Face Presence Monitor</h1>
+          <p class="subtitle" style="margin-bottom:16px;">Stay within the Frame and Face the Camera. Your Video is Processed Locally on our Server and Remains Entirely Private.</p>
+
+          <div class="viewfinder" id="viewfinder">
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+            <div class="status-chip" id="statusChip"><span class="pulse"></span><span id="statusText">Starting Camera</span></div>
+            <video id="video" autoplay playsinline muted></video>
+            <div id="faceBoxes"></div>
+          </div>
+          <canvas id="captureCanvas" style="display:none;"></canvas>
+
+          <div class="readouts">
+            <div class="readout">
+              <div class="label">Current Absence</div>
+              <div class="value" id="currentAbsence">0s</div>
+            </div>
+            <div class="readout">
+              <div class="label">Total Absence</div>
+              <div class="value accent" id="totalAbsence">0s</div>
+            </div>
+            <div class="readout">
+              <div class="label">Tab Switches</div>
+              <div class="value danger" id="tabSwitches">0</div>
+            </div>
+            <div class="readout">
+                <div class="label">Integrity Score</div>
+                <div class="value" id="integrityScore">{{ integrity_score }}%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel side-panel">
+          <div>
+            <p class="eyebrow">Session Status</p>
+            <span class="badge {{ 'badge-running' if status == 'Running' else 'badge-paused' }}" id="sessionBadge">{{ status }}</span>
+          </div>
+
+          <div>
+            <p class="eyebrow" style="margin-bottom:10px;">Live Activity Log</p>
+            <div class="log-scroll" id="logScroll">
+              <table class="log-table">
+                <tbody id="logBody">
+                  <tr><td colspan="2" style="color:var(--muted);">Waiting for Events…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <p class="hint">Switching Browser Tabs, Minimizing the Window or Losing Face Visibility is Logged and Included in your Final Report.</p>
+
+          <div class="btn-row" style="margin-top:18px;">
+            {% if status == 'Running' %}
+              <a class="btn btn-ghost" href="{{ url_for('pause_exam') }}" onclick="stopMonitoring();">Pause Exam</a>
+            {% else %}
+              <a class="btn btn-ghost" href="{{ url_for('resume_exam') }}">Resume Exam</a>
+            {% endif %}
+            <a class="btn btn-danger"
+              href="#"
+              onclick="return confirmEndExam();">
+                End Exam
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="legal">&copy; 2026 VigilProctor · Powered by Session-Audited SQLite & Haar-Cascade Detection Engine</footer>
+  </div>
+
+  <script>
+    window.EXAM_STATUS = "{{ status | tojson }}";
+  </script>
+  <script src="{{ url_for('static', filename='js/exam.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VigilProctor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span>VigilProctor<small>Exam Monitoring System</small></div>
+    </div>
+
+    <div class="stage">
+      <div class="panel card">
+        <p class="eyebrow">Candidate Access</p>
+        <h1 class="title">Sign In</h1>
+        <p class="subtitle">Authenticate to Open your Exam Dashboard. Your Session Activity is Recorded from Sign In.</p>
+
+        {% if message %}
+          <div class="alert alert-error">{{ message }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+          <div class="field">
+            <label for="email">Mail ID</label>
+            <input type="email" id="email" name="email" required autocomplete="email" placeholder="aarjavkjain2@gmail.com">
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary">Sign In</button>
+        </form>
+
+        <p class="foot-link">Not Registered Yet? <a href="{{ url_for('register') }}">Register with Photo Capture</a></p>
+      </div>
+    </div>
+
+    <footer class="legal">&copy; 2026 VigilProctor · Powered by Session-Audited SQLite & Haar-Cascade Detection Engine</footer>
+  </div>
+</body>
+</html>

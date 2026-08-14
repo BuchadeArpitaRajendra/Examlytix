@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VigilProctor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span>VigilProctor<small>Exam Monitoring System</small></div>
+    </div>
+
+    <div class="stage">
+      <div class="panel card">
+        <p class="eyebrow">Restricted Access</p>
+        <h1 class="title">Admin Sign In</h1>
+        <p class="subtitle">Enter the Admin Access Key to Manage Candidates, Sessions and Event Logs.</p>
+
+        {% if message %}
+          <div class="alert alert-error">{{ message }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('admin_login') }}">
+          <div class="field">
+            <label for="password">Admin Access Key</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary">Sign in</button>
+        </form>
+
+        <p class="foot-link"><a href="{{ url_for('dashboard') }}">Back to Candidate Dashboard</a></p>
+      </div>
+    </div>
+
+    <footer class="legal">&copy; 2026 VigilProctor · Powered by Session-Audited SQLite & Haar-Cascade Detection Engine</footer>
+  </div>
+</body>
+</html>
