@@ -280,13 +280,13 @@
                   <td><span
                       class="tag {{ 'bad' if 'Not Detected' in e['event_type'] else ('warn' if 'Tab' in e['event_type'] else ('ok' if 'Started' in e['event_type'] or 'Detected' == e['event_type'][-8:] else 'neutral')) }}">{{
                       e['event_type'] }}</span></td>
-                  <td>{{ datetime.fromisoformat(e['timestamp']).strftime("%d %b %Y, %I:%M:%S %p") }}</td>
+                  <td>{{ datetime.fromisoformat(e['timestamp']).strftime("%d %b %Y %I:%M:%S %p") }}</td>
                   <td>{{ e['remarks'] }}</td>
                   <td style="text-align:center;">
                     {% if e['screenshot_path'] %}
                     <button class="evidence-btn" onclick="showEvidence(
                           {{ e['event_id'] }},
-                          '{{ datetime.fromisoformat(e["timestamp"]).strftime("%d %b %Y, %I:%M:%S %p") }}' )"
+                          '{{ datetime.fromisoformat(e["timestamp"]).strftime("%d %b %Y %I:%M:%S %p") }}' )"
                       title="View Evidence">
                       <i class="bi bi-eye-fill"></i>
                     </button>
