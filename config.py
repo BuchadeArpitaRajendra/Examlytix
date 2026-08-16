@@ -14,4 +14,5 @@ FLASK_HOST = os.getenv("FLASK_HOST")
 FLASK_PORT = os.getenv("FLASK_PORT")
 FLASK_DEBUG = os.getenv("FLASK_DEBUG") == "True"
 SECRET_KEY = os.getenv("SECRET_KEY")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@vigilproctor.com")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")

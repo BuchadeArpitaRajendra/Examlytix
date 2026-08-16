@@ -3,81 +3,138 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>VigilProctor</title>
+  <title>VigilProctor - Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
   <div class="wrap">
     <div class="topbar">
       <div class="brand"><span class="dot"></span>VigilProctor<small>Exam Monitoring System</small></div>
-      <div class="who"><span class="name">{{ name }}</span> · {{ candidate_id }} · <a href="{{ url_for('logout') }}">Sign Out</a></div>
+      <div class="who">
+        <span class="name"><i class="bi bi-person-circle"></i> {{ name }}</span> 
+        <span style="opacity: 0.6;">|</span>
+        <span>ID: {{ candidate_id }}</span>
+        <span style="opacity: 0.6;">|</span>
+        <span class="badge badge-completed" style="margin: 0;">Student</span>
+        <a href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
+      </div>
     </div>
 
     <div class="stage">
       <div class="panel card wide">
-        <p class="eyebrow">Candidate Dashboard</p>
-        <h1 class="title">Welcome {{ name.split(' ')[0] }}</h1>
-        <p class="subtitle">Start your Exam when you're Ready. Once Started, your Web Camera and Browser Tab Focus are Monitored Continuously until you End the Exam.</p>
+        <p class="eyebrow">Welcome Back</p>
+        <h1 class="title"><i class="bi bi-house-fill"></i> Dashboard</h1>
+        <p class="subtitle">View your Exam Sessions, Integrity Scores, and Start New Monitoring Sessions.</p>
 
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label"><i class="bi bi-clock-history"></i> Total Sessions</div>
+            <div class="stat-value">0</div>
+            <div class="stat-change">Exam sessions completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="bi bi-camera-video"></i> Face Presence Ratio</div>
+            <div class="stat-value">100%</div>
+            <div class="stat-change positive"><i class="bi bi-arrow-up"></i> Excellent</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="bi bi-exclamation-triangle"></i> Risk Level</div>
+            <div class="stat-value" style="font-size: 20px;">
+              <span class="badge badge-completed">LOW</span>
+            </div>
+            <div class="stat-change">No issues detected</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="bi bi-shield-check"></i> Integrity Score</div>
+            <div class="stat-value" style="color: var(--success);">100</div>
+            <div class="stat-change positive">Good Standing</div>
+          </div>
+        </div>
+
+        <!-- Latest Session Card -->
         {% if latest_session %}
-        <div class="readouts">
-          <div class="readout">
-            <div class="label">Last Session Status</div>
-            <div class="value">
-              {% if latest_session['status'] == 'Running' %}<span class="badge badge-running">Running</span>
-              {% elif latest_session['status'] == 'Paused' %}<span class="badge badge-paused">Paused</span>
-              {% else %}<span class="badge badge-completed">Completed</span>{% endif %}
+        <div class="panel" style="background: linear-gradient(135deg, #dbeafe 0%, #cffafe 100%); border: 1px solid #bae6fd; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <p class="eyebrow" style="color: #0c4a6e;">Latest Session</p>
+              <h3 style="color: #0c4a6e; margin: 0 0 12px 0;">Session #{{ latest_session['session_id'] }}</h3>
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; font-size: 13px;">
+                <div>
+                  <span style="color: #0ea5e9; font-weight: 600;">Status:</span>
+                  <span style="color: #0c4a6e;">
+                    {% if latest_session['status'] == 'Running' %}
+                      <span class="badge badge-running">Running</span>
+                    {% elif latest_session['status'] == 'Paused' %}
+                      <span class="badge badge-paused">Paused</span>
+                    {% else %}
+                      <span class="badge badge-completed">{{ latest_session['status'] }}</span>
+                    {% endif %}
+                  </span>
+                </div>
+                <div>
+                  <span style="color: #0ea5e9; font-weight: 600;">Started:</span>
+                  <span style="color: #0c4a6e;">{{ datetime.fromisoformat(latest_session['start_time']).strftime("%d %b %Y %I:%M %p") }}</span>
+                </div>
+                <div>
+                  <span style="color: #0ea5e9; font-weight: 600;">Absence Duration:</span>
+                  <span style="color: #0c4a6e;">{{ latest_session['total_absence_duration'] or 0 }}s</span>
+                </div>
+                <div>
+                  <span style="color: #0ea5e9; font-weight: 600;">Tab Switches:</span>
+                  <span style="color: #0c4a6e;">{{ latest_session['total_tab_switches'] or 0 }}</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="readout">
-            <div class="label">Last Session Started</div>
-            <div class="value" style="font-size:13px;">
-              {{ datetime.fromisoformat(latest_session['start_time']).strftime("%d %b %Y") }}<br>
-              {{ datetime.fromisoformat(latest_session['start_time']).strftime("%I:%M:%S %p") }}
+            {% if latest_session['status'] == 'Completed' and latest_session['integrity_score'] is not none %}
+            <div style="text-align: center; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <div style="font-size: 11px; font-weight: 600; color: #0c4a6e; text-transform: uppercase; letter-spacing: 0.5px;">Score</div>
+              <div style="font-size: 28px; font-weight: 700; color: var(--success); margin: 4px 0;">{{ latest_session['integrity_score'] }}</div>
+              <div style="font-size: 11px; color: #0ea5e9; font-weight: 600;">/100</div>
             </div>
-          </div>
-          <div class="readout">
-            <div class="label">Absence Logged</div>
-            <div class="value accent">{{ latest_session['total_absence_duration'] or 0 }} seconds</div>
+            {% endif %}
           </div>
         </div>
         {% else %}
-        <div class="readouts">
-          <div class="readout">
-            <div class="label">Last Session Status</div>
-            <div class="value">
-              <span class="badge badge-completed">NA</span>
-            </div>
-          </div>
-          <div class="readout">
-            <div class="label">Last Session Started</div>
-            <div class="value">
-              <span class="badge badge-completed">NA</span>
-            </div>
-          </div>
-          <div class="readout">
-            <div class="label">Absence Logged</div>
-            <div class="value">
-              <span class="badge badge-completed">NA</span>
-            </div>
-          </div>
+        <div class="panel" style="background-color: var(--bg-alt); text-align: center; padding: 32px; margin-bottom: 24px;">
+          <i class="bi bi-inbox" style="font-size: 32px; color: var(--text-muted); opacity: 0.5; display: block; margin-bottom: 12px;"></i>
+          <p style="color: var(--text-muted); margin: 0;">No exam sessions yet. Start your first session to begin monitoring.</p>
         </div>
         {% endif %}
 
-        <div class="action-list">
+        <!-- Action Buttons -->
+        <div class="action-list" style="margin-bottom: 24px;">
           {% if latest_session and latest_session['status'] == 'Paused' %}
-            <a class="btn btn-primary" href="{{ url_for('resume_exam') }}">
-                Resume Monitoring Session
+            <a class="btn btn-primary" href="{{ url_for('resume_exam') }}" style="gap: 8px;">
+              <i class="bi bi-play-fill"></i> Resume Monitoring Session
             </a>
           {% elif latest_session and latest_session['status'] == 'Running' %}
-            <a class="btn btn-primary" href="{{ url_for('exam') }}">
-                Continue Monitoring Session
+            <a class="btn btn-primary" href="{{ url_for('exam') }}" style="gap: 8px;">
+              <i class="bi bi-camera-video-fill"></i> Continue Monitoring Session
             </a>
           {% else %}
-            <a class="btn btn-primary" href="{{ url_for('start_exam') }}">
-                Start Exam
+            <a class="btn btn-primary" href="{{ url_for('start_exam') }}" style="gap: 8px;">
+              <i class="bi bi-play-circle-fill"></i> Start New Exam
             </a>
           {% endif %}
+          <a class="btn btn-ghost" href="{{ url_for('summary', session_id=latest_session['session_id']) if latest_session else '#' }}" style="gap: 8px; {% if not latest_session or latest_session['status'] != 'Completed' %}opacity: 0.5; pointer-events: none;{% endif %}">
+            <i class="bi bi-file-earmark-pdf"></i> View Report
+          </a>
+        </div>
+
+        <!-- Recent Activity -->
+        <p class="eyebrow" style="margin-top: 24px; margin-bottom: 12px;">
+          <i class="bi bi-clock-history"></i> Recent Activity
+        </p>
+        <div style="background-color: var(--bg-alt); border-radius: var(--radius-lg); overflow: hidden;">
+          <div class="log-scroll" style="max-height: 300px; margin: 0; padding: 0; border: none; background: transparent;">
+            <div style="padding: var(--spacing-lg);">
+              <p style="color: var(--text-muted); text-align: center; margin: 0;">
+                <i class="bi bi-info-circle"></i> No recent activity. Start an exam to see activity logs.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

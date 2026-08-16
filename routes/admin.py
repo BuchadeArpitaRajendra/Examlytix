@@ -5,15 +5,15 @@ import re
 from app import app
 import database
 from utils import *
-from config import ADMIN_PASSWORD
+from config import ADMIN_EMAIL, ADMIN_PASSWORD
 
 @app.route("/admin/login", methods=["GET", "POST"])
-@login_required
 def admin_login():
     if request.method == "GET":
         return render_template("admin_login.html")
-    password = request.form.get("password", "")
-    if password == ADMIN_PASSWORD:
+    email = request.form.get("email", "").strip().lower()
+    password = request.form.get("password", "").strip()
+    if email == ADMIN_EMAIL.lower() and password == ADMIN_PASSWORD:
         session["is_admin"] = True
         return redirect(url_for("admin_dashboard"))
     return render_template("admin_login.html", message="Invalid Credentials, Please Try Again")

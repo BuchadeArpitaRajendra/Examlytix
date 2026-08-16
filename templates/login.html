@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>VigilProctor</title>
+  <title>VigilProctor - Sign In</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
   <div class="wrap">
@@ -14,31 +15,97 @@
 
     <div class="stage">
       <div class="panel card">
-        <p class="eyebrow">Candidate Access</p>
+        <p class="eyebrow">Authentication Portal</p>
         <h1 class="title">Sign In</h1>
-        <p class="subtitle">Authenticate to Open your Exam Dashboard. Your Session Activity is Recorded from Sign In.</p>
+        <p class="subtitle">Authenticate to Access your Dashboard. Your Session Activity is Recorded from Sign In.</p>
 
         {% if message %}
-          <div class="alert alert-error">{{ message }}</div>
+          <div class="alert alert-error"><i class="bi bi-exclamation-circle"></i> {{ message }}</div>
         {% endif %}
 
-        <form method="POST" action="{{ url_for('login') }}">
+        <!-- Role-based Tabs -->
+        <div class="admin-tabs" style="margin-bottom: 24px;">
+          <button class="admin-tab active" data-role="student" onclick="switchRole('student', event)">
+            <i class="bi bi-person"></i> Student Login
+          </button>
+          <button class="admin-tab" data-role="admin" onclick="switchRole('admin', event)">
+            <i class="bi bi-shield-check"></i> Admin Login
+          </button>
+        </div>
+
+        <!-- Student Login Form (default visible) -->
+        <form method="POST" action="{{ url_for('login') }}" id="studentForm" class="login-form active">
           <div class="field">
-            <label for="email">Mail ID</label>
-            <input type="email" id="email" name="email" required autocomplete="email" placeholder="aarjavkjain2@gmail.com">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required autocomplete="email" placeholder="candidate@example.com">
           </div>
           <div class="field">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+            <div class="toggle-password">
+              <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+              <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('password')">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
           </div>
-          <button type="submit" class="btn btn-primary">Sign In</button>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In as Student</button>
         </form>
 
-        <p class="foot-link">Not Registered Yet? <a href="{{ url_for('register') }}">Register with Photo Capture</a></p>
+        <!-- Admin Login Form (hidden by default) -->
+        <form method="POST" action="{{ url_for('admin_login') }}" id="adminForm" class="login-form" style="display: none;">
+          <div class="field">
+            <label for="admin-email">Admin Email</label>
+            <input type="email" id="admin-email" name="email" required autocomplete="email" placeholder="admin@vigilproctor.com">
+          </div>
+          <div class="field">
+            <label for="admin-password">Admin Password</label>
+            <div class="toggle-password">
+              <input type="password" id="admin-password" name="password" required autocomplete="current-password" placeholder="••••••••">
+              <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('admin-password')">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In as Admin</button>
+        </form>
+
+        <p class="foot-link">Not a Registered Candidate? <a href="{{ url_for('register') }}"><i class="bi bi-arrow-right"></i> Register with Photo Capture</a></p>
       </div>
     </div>
 
     <footer class="legal">&copy; 2026 VigilProctor · Powered by Session-Audited SQLite & Haar-Cascade Detection Engine</footer>
   </div>
+
+  <script>
+    function switchRole(role, event) {
+      event.preventDefault();
+      
+      // Update tab active state
+      document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.closest('.admin-tab').classList.add('active');
+      
+      // Show/hide forms
+      document.getElementById('studentForm').style.display = role === 'student' ? 'block' : 'none';
+      document.getElementById('adminForm').style.display = role === 'admin' ? 'block' : 'none';
+    }
+
+    function togglePasswordVisibility(fieldId) {
+      const field = document.getElementById(fieldId);
+      const btn = event.target.closest('.toggle-password-btn');
+      const icon = btn.querySelector('i');
+      
+      if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+      } else {
+        field.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+      }
+    }
+  </script>
 </body>
 </html>

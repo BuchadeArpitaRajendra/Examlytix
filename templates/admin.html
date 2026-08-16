@@ -1,10 +1,9 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>VigilProctor</title>
+  <title>VigilProctor - Admin Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -14,363 +13,446 @@
   <div class="wrap">
     <div class="topbar">
       <div class="brand"><span class="dot"></span>VigilProctor<small>Admin Console</small></div>
-      <div class="who"><span class="name">Administrator</span> · <a href="{{ url_for('admin_logout') }}">Sign Out</a>
+      <div class="who">
+        <span class="name"><i class="bi bi-shield-check"></i> Administrator</span> 
+        <a href="{{ url_for('admin_logout') }}"><i class="bi bi-box-arrow-right"></i> Sign Out</a>
       </div>
     </div>
 
     <div class="stage" style="align-items:flex-start; padding-top:32px;">
       <div class="panel card xwide">
-        <p class="eyebrow">Data Management</p>
+        <p class="eyebrow"><i class="bi bi-speedometer2"></i> System Management</p>
         <h1 class="title">Admin Dashboard</h1>
-        <p class="subtitle">View and Edit every Candidate, Session and Event Log Entry Stored in the System.</p>
+        <p class="subtitle">Monitor Candidates, Exams, Events, and System Integrity. View Analytics and Manage All Exam Data.</p>
 
+        <!-- Tab Navigation -->
         <div class="admin-tabs">
-          <button class="admin-tab active" data-tab="analytics">
-            Analytics
+          <button class="admin-tab active" data-tab="analytics" onclick="switchTab('analytics')">
+            <i class="bi bi-graph-up"></i> Analytics
           </button>
-          <button class="admin-tab" data-tab="candidates">
-            Candidates
+          <button class="admin-tab" data-tab="candidates" onclick="switchTab('candidates')">
+            <i class="bi bi-people"></i> Candidates
           </button>
-          <button class="admin-tab" data-tab="sessions">
-            Sessions
+          <button class="admin-tab" data-tab="sessions" onclick="switchTab('sessions')">
+            <i class="bi bi-hourglass-split"></i> Sessions
           </button>
-          <button class="admin-tab" data-tab="events">
-            Event Logs
+          <button class="admin-tab" data-tab="events" onclick="switchTab('events')">
+            <i class="bi bi-list-check"></i> Event Logs
           </button>
         </div>
 
-        <!-- Analytics -->
+        <!-- ============================================ -->
+        <!-- ANALYTICS TAB -->
+        <!-- ============================================ -->
         <div class="admin-panel-body active" id="tab-analytics">
-          <p class="eyebrow" style="margin-bottom:12px;">System Statistics</p>
-          <div class="readouts">
-            <div class="readout">
-              <div class="label">Total Candidates</div>
-              <div class="value">{{ analytics.total_candidates }}</div>
+          <!-- System Statistics Cards -->
+          <p class="eyebrow" style="margin-bottom:16px;"><i class="bi bi-speedometer"></i> System Overview</p>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label"><i class="bi bi-person-badge"></i> Total Candidates</div>
+              <div class="stat-value">{{ analytics.total_candidates }}</div>
+              <div class="stat-change">Registered users</div>
             </div>
-            <div class="readout">
-              <div class="label">Total Sessions</div>
-              <div class="value">{{ analytics.total_sessions }}</div>
+            <div class="stat-card">
+              <div class="stat-label"><i class="bi bi-clock-history"></i> Total Sessions</div>
+              <div class="stat-value">{{ analytics.total_sessions }}</div>
+              <div class="stat-change">Exams conducted</div>
             </div>
-            <div class="readout">
-              <div class="label">Total Event Logs</div>
-              <div class="value">{{ analytics.total_logs }}</div>
+            <div class="stat-card">
+              <div class="stat-label"><i class="bi bi-check-circle"></i> Completed Exams</div>
+              <div class="stat-value accent">{{ analytics.exam_completed }}</div>
+              <div class="stat-change positive">Successfully finished</div>
             </div>
-            <div class="readout">
-              <div class="label">Evidence Screenshots</div>
-              <div class="value">{{ analytics.screenshots_captured }}</div>
+            <div class="stat-card">
+              <div class="stat-label"><i class="bi bi-shield-check"></i> Avg Integrity Score</div>
+              <div class="stat-value">{{ analytics.average_integrity_score }}/100</div>
+              <div class="stat-change">System average</div>
             </div>
           </div>
-          <br>
-          <p class="eyebrow" style="margin-bottom:12px;">Monitoring Statistics</p>
+
+          <!-- Monitoring Statistics -->
+          <p class="eyebrow" style="margin-top:24px; margin-bottom:16px;"><i class="bi bi-exclamation-circle"></i> Monitoring Events</p>
           <div class="readouts">
             <div class="readout">
-              <div class="label">Face Absence Events</div>
+              <div class="label"><i class="bi bi-camera-slash"></i> Face Absence Events</div>
               <div class="value danger">{{ analytics.face_absence_events }}</div>
             </div>
             <div class="readout">
-              <div class="label">Face Detected Events</div>
+              <div class="label"><i class="bi bi-camera-video"></i> Face Detected Events</div>
               <div class="value accent">{{ analytics.face_detected_events }}</div>
             </div>
             <div class="readout">
-              <div class="label">Browser Focus Loss</div>
+              <div class="label"><i class="bi bi-window"></i> Focus Loss Events</div>
               <div class="value warn">{{ analytics.browser_focus_loss_events }}</div>
             </div>
             <div class="readout">
-              <div class="label">Browser Focus Return</div>
+              <div class="label"><i class="bi bi-arrow-repeat"></i> Focus Return Events</div>
               <div class="value accent">{{ analytics.browser_focus_return_events }}</div>
             </div>
           </div>
-          <br>
-          <p class="eyebrow" style="margin-bottom:12px;">Session Statistics</p>
+
+          <!-- Session Statistics -->
+          <p class="eyebrow" style="margin-top:24px; margin-bottom:16px;"><i class="bi bi-hourglass-split"></i> Session Status</p>
           <div class="readouts">
             <div class="readout">
-              <div class="label">Exams Started</div>
+              <div class="label"><i class="bi bi-play-circle"></i> Exams Started</div>
               <div class="value">{{ analytics.exam_started }}</div>
             </div>
             <div class="readout">
-              <div class="label">Exams Completed</div>
+              <div class="label"><i class="bi bi-check-circle"></i> Exams Completed</div>
               <div class="value accent">{{ analytics.exam_completed }}</div>
             </div>
             <div class="readout">
-              <div class="label">Running Sessions</div>
+              <div class="label"><i class="bi bi-hourglass-top"></i> Running Sessions</div>
               <div class="value warn">{{ analytics.running_sessions }}</div>
             </div>
             <div class="readout">
-              <div class="label">Paused Sessions</div>
+              <div class="label"><i class="bi bi-pause-circle"></i> Paused Sessions</div>
               <div class="value danger">{{ analytics.paused_sessions }}</div>
             </div>
           </div>
-          <br>
-          <p class="eyebrow" style="margin-bottom:12px;">Integrity Statistics</p>
+
+          <!-- Integrity Statistics -->
+          <p class="eyebrow" style="margin-top:24px; margin-bottom:16px;"><i class="bi bi-graph-up"></i> Integrity Score Statistics</p>
           <div class="readouts">
             <div class="readout">
-              <div class="label">Highest Integrity Score</div>
-              <div class="value accent">
-                {{ analytics.highest_integrity_score }}/100
-              </div>
+              <div class="label"><i class="bi bi-arrow-up"></i> Highest Score</div>
+              <div class="value accent">{{ analytics.highest_integrity_score }}/100</div>
             </div>
             <div class="readout">
-              <div class="label">Average Integrity Score</div>
-              <div class="value warn">
-                {{ analytics.average_integrity_score }}/100
-              </div>
+              <div class="label"><i class="bi bi-bar-chart"></i> Average Score</div>
+              <div class="value warn">{{ analytics.average_integrity_score }}/100</div>
             </div>
             <div class="readout">
-              <div class="label">Lowest Integrity Score</div>
-              <div class="value danger">
-                {{ analytics.lowest_integrity_score }}/100
-              </div>
+              <div class="label"><i class="bi bi-arrow-down"></i> Lowest Score</div>
+              <div class="value danger">{{ analytics.lowest_integrity_score }}/100</div>
+            </div>
+            <div class="readout">
+              <div class="label"><i class="bi bi-image"></i> Evidence Captured</div>
+              <div class="value">{{ analytics.screenshots_captured }}</div>
             </div>
           </div>
-          
         </div>
 
-        <!-- Candidates -->
+        <!-- ============================================ -->
+        <!-- CANDIDATES TAB -->
+        <!-- ============================================ -->
         <div class="admin-panel-body" id="tab-candidates">
-          <div class="table-toolbar">
-            <span class="count">{{ candidates|length }} Candidate(s)</span>
-          </div>
           <div class="admin-table-wrap">
-            <table class="log-table" id="candidatesTable">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Mail ID</th>
-                  <th>Age</th>
-                  <th>Subject</th>
-                  <th>Photo</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for c in candidates %}
-                <tr data-row-id="{{ c['candidate_id'] }}">
-                  <td>{{ c['candidate_id'] }}</td>
-                  <td>{{ c['name'] }}</td>
-                  <td>{{ c['email'] }}</td>
-                  <td>{{ c['age'] or '—' }}</td>
-                  <td>{{ c['exam_subject'] or '—' }}</td>
-                  <td>{% if c['photo_path'] %}<a href="{{ url_for('static', filename='..') }}/{{ c['photo_path'] }}"
-                      target="_blank">view</a>{% else %}—{% endif %}</td>
-                  <td class="row-actions">
-                    <button class="icon-btn" data-edit="candidate" data-id="{{ c['candidate_id'] }}"
-                      data-name="{{ c['name'] }}" data-email="{{ c['email'] }}" data-age="{{ c['age'] or '' }}"
-                      data-subject="{{ c['exam_subject'] or '' }}">Edit</button>
-                    <button class="icon-btn danger" data-delete="candidate"
-                      data-id="{{ c['candidate_id'] }}">Delete</button>
-                  </td>
-                </tr>
-                {% else %}
-                <tr class="empty-row">
-                  <td colspan="7">No candidates registered yet.</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+            <div class="table-toolbar">
+              <span class="count"><i class="bi bi-people"></i> {{ candidates|length }} Candidate(s)</span>
+              <div style="display: flex; gap: var(--spacing-sm);">
+                <button class="btn btn-ghost" style="padding: 4px 12px; font-size: 12px;" onclick="window.location.reload()">
+                  <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+              </div>
+            </div>
+            <div class="log-table-scroll">
+              <table class="log-table" id="candidatesTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Mail ID</th>
+                    <th>Age</th>
+                    <th>Subject</th>
+                    <th>Photo</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for c in candidates %}
+                  <tr data-row-id="{{ c['candidate_id'] }}">
+                    <td><strong>{{ c['candidate_id'] }}</strong></td>
+                    <td>{{ c['name'] }}</td>
+                    <td>{{ c['email'] }}</td>
+                    <td>{{ c['age'] or '—' }}</td>
+                    <td>{{ c['exam_subject'] or '—' }}</td>
+                    <td>
+                      {% if c['photo_path'] %}
+                      <button class="icon-btn" onclick="viewPhoto('{{ c['photo_path'] }}', '{{ c['name'] }}')" style="background: linear-gradient(135deg, var(--accent), var(--primary)); padding: 4px 10px; font-size: 11px;">
+                        <i class="bi bi-eye"></i> View
+                      </button>
+                      {% else %}
+                      <span class="text-muted" style="font-size: 12px;">No photo</span>
+                      {% endif %}
+                    </td>
+                    <td class="row-actions">
+                      <button class="icon-btn" data-edit="candidate" data-id="{{ c['candidate_id'] }}"
+                        data-name="{{ c['name'] }}" data-email="{{ c['email'] }}" data-age="{{ c['age'] or '' }}"
+                        data-subject="{{ c['exam_subject'] or '' }}">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button class="icon-btn danger" data-delete="candidate" data-id="{{ c['candidate_id'] }}">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  {% else %}
+                  <tr class="empty-row">
+                    <td colspan="7">No candidates registered yet.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <!-- Sessions -->
+        <!-- ============================================ -->
+        <!-- SESSIONS TAB -->
+        <!-- ============================================ -->
         <div class="admin-panel-body" id="tab-sessions">
-          <div class="table-toolbar">
-            <span class="count">{{ sessions|length }} Session(s)</span>
-          </div>
           <div class="admin-table-wrap">
-            <table class="log-table" id="sessionsTable">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Candidate</th>
-                  <th>Start</th>
-                  <th>End</th>
-                  <th>Status</th>
-                  <th>Absence Duration</th>
-                  <th>Tab Switches</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for s in sessions %}
-                <tr data-row-id="{{ s['session_id'] }}">
-                  <td>{{ s['session_id'] }}</td>
-                  <td>{{ s['candidate_id'] }}<span style="color:var(--muted);"> - {{ s['candidate_name'] or '' }}</span>
-                  </td>
-                  <td>{{ s['start_time'] or '-' }}</td>
-                  <td>{{ s['end_time'] or '-' }}</td>
-                  <td>
-                    {% if s['status'] == 'Running' %}<span class="badge badge-running">Running</span>
-                    {% elif s['status'] == 'Paused' %}<span class="badge badge-paused">Paused</span>
-                    {% else %}<span class="badge badge-completed">{{ s['status'] }}</span>{% endif %}
-                  </td>
-                  <td>{{ s['total_absence_duration'] or 0 }}</td>
-                  <td>{{ s['total_tab_switches'] or 0 }}</td>
-                  <td class="row-actions">
-                    <button class="icon-btn" data-edit="session" data-id="{{ s['session_id'] }}"
-                      data-status="{{ s['status'] }}" data-absence="{{ s['total_absence_duration'] or 0 }}"
-                      data-switches="{{ s['total_tab_switches'] or 0 }}">Edit</button>
-                    <button class="icon-btn danger" data-delete="session"
-                      data-id="{{ s['session_id'] }}">Delete</button>
-                  </td>
-                </tr>
-                {% else %}
-                <tr class="empty-row">
-                  <td colspan="8">No Sessions Recorded Yet</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+            <div class="table-toolbar">
+              <span class="count"><i class="bi bi-hourglass-split"></i> {{ sessions|length }} Session(s)</span>
+              <div style="display: flex; gap: var(--spacing-sm);">
+                <button class="btn btn-ghost" style="padding: 4px 12px; font-size: 12px;" onclick="window.location.reload()">
+                  <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+              </div>
+            </div>
+            <div class="log-table-scroll">
+              <table class="log-table" id="sessionsTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Candidate</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+                    <th>Absence</th>
+                    <th>Tab Switches</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for s in sessions %}
+                  <tr data-row-id="{{ s['session_id'] }}">
+                    <td><strong>{{ s['session_id'] }}</strong></td>
+                    <td>{{ s['candidate_id'] }} <span style="color:var(--text-muted); font-size: 11px;">- {{ s['candidate_name'] or '' }}</span></td>
+                    <td style="font-size: 12px; white-space: nowrap;">{{ (datetime.fromisoformat(s['start_time']).strftime("%d %b %H:%M")) if s['start_time'] else '-' }}</td>
+                    <td style="font-size: 12px; white-space: nowrap;">{{ (datetime.fromisoformat(s['end_time']).strftime("%d %b %H:%M")) if s['end_time'] else '-' }}</td>
+                    <td>
+                      {% if s['status'] == 'Running' %}<span class="badge badge-running">Running</span>
+                      {% elif s['status'] == 'Paused' %}<span class="badge badge-paused">Paused</span>
+                      {% else %}<span class="badge badge-completed">{{ s['status'] }}</span>{% endif %}
+                    </td>
+                    <td>{{ s['total_absence_duration'] or 0 }}s</td>
+                    <td>{{ s['total_tab_switches'] or 0 }}</td>
+                    <td class="row-actions">
+                      <button class="icon-btn" data-edit="session" data-id="{{ s['session_id'] }}"
+                        data-status="{{ s['status'] }}" data-absence="{{ s['total_absence_duration'] or 0 }}"
+                        data-switches="{{ s['total_tab_switches'] or 0 }}">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button class="icon-btn danger" data-delete="session" data-id="{{ s['session_id'] }}">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  {% else %}
+                  <tr class="empty-row">
+                    <td colspan="8">No sessions recorded yet.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <!-- Event Logs -->
+        <!-- ============================================ -->
+        <!-- EVENT LOGS TAB -->
+        <!-- ============================================ -->
         <div class="admin-panel-body" id="tab-events">
-          <div class="table-toolbar">
-              <form method="GET" action="{{ url_for('admin_dashboard') }}" class="filter-form">
-                  <input
-                      type="text"
-                      name="candidate_id"
-                      placeholder="Candidate ID"
-                      value="{{ request.args.get('candidate_id', '') }}">
-                  <select name="event_type">
-                      <option value="">All Events</option>
-                      {% for t in event_types %}
-                      <option value="{{ t }}"
-                          {% if request.args.get('event_type') == t %}selected{% endif %}>
-                          {{ t }}
-                      </option>
-                      {% endfor %}
-                  </select>
-                  <input
-                      type="date"
-                      name="date"
-                      value="{{ request.args.get('date','') }}">
-                  <button class="btn btn-primary">
-                      Filter
-                  </button>
-                  <a href="{{ url_for('admin_dashboard') }}"
-                    class="btn btn-ghost">
-                      Reset
-                  </a>
-              </form>
-              <span class="count">
-                  {{ events|length }} Event(s)
-              </span>
-          </div>
           <div class="admin-table-wrap">
-            <table class="log-table" id="eventsTable">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>CID</th>
-                  <th>SID</th>
-                  <th>Event</th>
-                  <th>Time</th>
-                  <th>Remarks</th>
-                  <th>Evidence</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for e in events %}
-                <tr data-row-id="{{ e['event_id'] }}">
-                  <td>{{ e['event_id'] }}</td>
-                  <td>{{ e['candidate_id'] }}</td>
-                  <td>{{ e['session_id'] }}</td>
-                  <td><span
-                      class="tag {{ 'bad' if 'Not Detected' in e['event_type'] else ('warn' if 'Tab' in e['event_type'] else ('ok' if 'Started' in e['event_type'] or 'Detected' == e['event_type'][-8:] else 'neutral')) }}">{{
-                      e['event_type'] }}</span></td>
-                  <td>{{ datetime.fromisoformat(e['timestamp']).strftime("%d %b %Y %I:%M:%S %p") }}</td>
-                  <td>{{ e['remarks'] }}</td>
-                  <td style="text-align:center;">
-                    {% if e['screenshot_path'] %}
-                    <button class="evidence-btn" onclick="showEvidence(
-                          {{ e['event_id'] }},
-                          '{{ datetime.fromisoformat(e["timestamp"]).strftime("%d %b %Y %I:%M:%S %p") }}' )"
-                      title="View Evidence">
-                      <i class="bi bi-eye-fill"></i>
-                    </button>
-                    {% else %}
-                    <button class="evidence-btn" disabled title="No Evidence">
-                      <i class="bi bi-eye-slash-fill"></i>
-                    </button>
-                    {% endif %}
-                  </td>
-                  <td class="row-actions">
-                    <button class="icon-btn" data-edit="event" data-id="{{ e['event_id'] }}"
-                      data-eventtype="{{ e['event_type'] }}" data-remarks="{{ e['remarks'] }}">Edit</button>
-                    <button class="icon-btn danger" data-delete="event" data-id="{{ e['event_id'] }}">Delete</button>
-                  </td>
-                </tr>
-                {% else %}
-                <tr class="empty-row">
-                  <td colspan="7">No events logged yet.</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+            <div class="table-toolbar">
+              <span class="count"><i class="bi bi-list-check"></i> {{ events|length }} Event(s)</span>
+              <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap; align-items: center;">
+                <form method="GET" action="{{ url_for('admin_dashboard') }}" class="filter-form" style="gap: var(--spacing-sm); flex-wrap: wrap;">
+                  <input type="text" name="candidate_id" placeholder="Candidate ID" value="{{ request.args.get('candidate_id', '') }}" style="min-width: 100px; padding: 6px 10px; font-size: 12px;">
+                  <select name="event_type" style="min-width: 120px; padding: 6px 10px; font-size: 12px;">
+                    <option value="">All Events</option>
+                    {% for t in event_types %}
+                    <option value="{{ t }}" {% if request.args.get('event_type') == t %}selected{% endif %}>
+                      {{ t }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                  <input type="date" name="date" value="{{ request.args.get('date','') }}" style="min-width: 120px; padding: 6px 10px; font-size: 12px;">
+                  <button class="btn btn-primary" style="padding: 6px 14px; font-size: 12px;"><i class="bi bi-funnel"></i> Filter</button>
+                  <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost" style="padding: 6px 14px; font-size: 12px;"><i class="bi bi-arrow-counterclockwise"></i> Reset</a>
+                </form>
+              </div>
+            </div>
+            <div class="log-table-scroll">
+              <table class="log-table" id="eventsTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>CID</th>
+                    <th>SID</th>
+                    <th>Event</th>
+                    <th>Time</th>
+                    <th>Remarks</th>
+                    <th>Evidence</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for e in events %}
+                  <tr data-row-id="{{ e['event_id'] }}">
+                    <td><strong>{{ e['event_id'] }}</strong></td>
+                    <td>{{ e['candidate_id'] }}</td>
+                    <td>{{ e['session_id'] }}</td>
+                    <td>
+                      <span class="tag {{ 'bad' if 'Not Detected' in e['event_type'] else ('warn' if 'Tab' in e['event_type'] else ('ok' if 'Started' in e['event_type'] or 'Detected' == e['event_type'][-8:] else 'neutral')) }}">
+                        {{ e['event_type'] }}
+                      </span>
+                    </td>
+                    <td style="white-space: nowrap; font-size: 11px;">
+                      {{ datetime.fromisoformat(e['timestamp']).strftime("%d %b %H:%M:%S") }}
+                    </td>
+                    <td style="font-size: 11px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ e['remarks'] }}</td>
+                    <td style="text-align:center;">
+                      {% if e['screenshot_path'] %}
+                      <button class="evidence-btn" onclick="showEvidence({{ e['event_id'] }}, '{{ datetime.fromisoformat(e['timestamp']).strftime('%d %b %Y %I:%M:%S %p') }}')" title="View Evidence" style="padding: 4px 8px; font-size: 11px;">
+                        <i class="bi bi-image-fill"></i>
+                      </button>
+                      {% else %}
+                      <button class="evidence-btn" disabled title="No Evidence" style="padding: 4px 8px; font-size: 11px;">
+                        <i class="bi bi-image-slash"></i>
+                      </button>
+                      {% endif %}
+                    </td>
+                    <td class="row-actions">
+                      <button class="icon-btn" data-edit="event" data-id="{{ e['event_id'] }}"
+                        data-eventtype="{{ e['event_type'] }}" data-remarks="{{ e['remarks'] }}">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button class="icon-btn danger" data-delete="event" data-id="{{ e['event_id'] }}">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  {% else %}
+                  <tr class="empty-row">
+                    <td colspan="8">No events logged yet.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
 
+    <!-- Evidence Modal -->
     <div id="evidenceModal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h3><i class="bi bi-image"></i>Evidence Screenshot</h3>
+          <h3><i class="bi bi-image-fill"></i> Evidence Screenshot</h3>
           <button class="close-btn" onclick="closeEvidence()">
             <i class="bi bi-x-lg"></i>
           </button>
         </div>
         <div class="modal-body">
-          <p><i class="bi bi-clock-history"></i><span id="evidenceInfo">Captured during Suspicious Activity</span></p>
-          <img id="evidenceImage">
+          <p><i class="bi bi-clock-history"></i> <span id="evidenceInfo">Captured during suspicious activity</span></p>
+          <div style="text-align: center; background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-md); min-height: 200px; display: flex; align-items: center; justify-content: center;">
+            <img id="evidenceImage" style="max-width: 100%; max-height: 500px; border-radius: var(--radius); display: none;">
+            <div id="evidenceLoading" style="color: var(--text-muted);">
+              <i class="bi bi-hourglass-split" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>
+              Loading evidence...
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <script>
-      function showEvidence(eventId, timestamp) {
-        document.getElementById("evidenceImage").src = "/evidence/" + eventId;
-        document.getElementById("evidenceInfo").textContent = 'Captured: ' + timestamp;
-        document.getElementById("evidenceModal").classList.add("show");
-      }
-      function closeEvidence() {
-        document.getElementById("evidenceModal").classList.remove("show");
-      }
-      window.onclick = function (event) {
-        if (event.target.id === "evidenceModal") {
-          closeEvidence();
-        }
-      }
-      document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape") {
-          closeEvidence();
-        }
-      });
-    </script>
-
-    <footer class="legal">&copy; 2026 VigilProctor · Powered by Session-Audited SQLite & Haar-Cascade Detection Engine
-    </footer>
-  </div>
-
-  <!-- Edit Modal -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="panel modal-box card">
-      <p class="eyebrow" id="modalEyebrow">Edit Record</p>
-      <h1 class="title" style="font-size:19px;" id="modalTitle">Edit</h1>
-      <div id="modalErrors"></div>
-      <form id="modalForm">
-        <div id="modalFields"></div>
-        <div class="btn-row" style="margin-top:6px;">
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-          <button type="button" class="btn btn-ghost" id="modalCancel">Cancel</button>
-        </div>
-      </form>
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="panel modal-box card">
+        <p class="eyebrow" id="modalEyebrow">Edit Record</p>
+        <h1 class="title" style="font-size:19px;" id="modalTitle">Edit</h1>
+        <div id="modalErrors"></div>
+        <form id="modalForm">
+          <div id="modalFields"></div>
+          <div class="btn-row" style="margin-top:6px;">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" class="btn btn-ghost" id="modalCancel">Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
+
+    <footer class="legal">&copy; 2026 VigilProctor · Powered by Session-Audited SQLite & Haar-Cascade Detection Engine</footer>
   </div>
+
+  <script>
+    // Tab switching
+    function switchTab(tabName) {
+      // Hide all tab panels
+      document.querySelectorAll('.admin-panel-body').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      // Show selected tab
+      const selectedTab = document.getElementById('tab-' + tabName);
+      if (selectedTab) selectedTab.classList.add('active');
+      
+      // Update tab buttons
+      document.querySelectorAll('.admin-tab').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === tabName) btn.classList.add('active');
+      });
+    }
+
+    // Photo View
+    function viewPhoto(photoPath, candidateName) {
+      window.open('/' + photoPath, '_blank');
+    }
+
+    // Evidence functions
+    function showEvidence(eventId, timestamp) {
+      const img = document.getElementById("evidenceImage");
+      const info = document.getElementById("evidenceInfo");
+      const loading = document.getElementById("evidenceLoading");
+      
+      img.style.display = 'none';
+      loading.style.display = 'block';
+      loading.innerHTML = '<i class="bi bi-hourglass-split" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>Loading evidence...';
+      
+      img.src = "/evidence/" + eventId;
+      
+      img.onload = function() {
+        loading.style.display = 'none';
+        img.style.display = 'block';
+        info.textContent = '📸 Captured: ' + (timestamp || 'Unknown time');
+        document.getElementById("evidenceModal").classList.add("show");
+      };
+      
+      img.onerror = function() {
+        loading.innerHTML = '<i class="bi bi-exclamation-triangle" style="font-size: 40px; display: block; margin-bottom: 10px; color: var(--danger);"></i>Failed to load evidence for Event #' + eventId;
+        info.textContent = '⚠️ Image not found';
+        document.getElementById("evidenceModal").classList.add("show");
+      };
+    }
+    
+    function closeEvidence() {
+      document.getElementById("evidenceModal").classList.remove("show");
+    }
+    
+    window.onclick = function(event) {
+      if (event.target.id === "evidenceModal") closeEvidence();
+    }
+    
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") closeEvidence();
+    });
+  </script>
 
   <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 </body>
-
 </html>

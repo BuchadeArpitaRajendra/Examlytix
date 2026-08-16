@@ -18,6 +18,33 @@
   let detectorTimer = null;
   let examEnding = false;
 
+  // =============================================
+  // ENSURE TIMER IS RUNNING
+  // =============================================
+  function ensureTimerRunning() {
+    // Check if timer is already running
+    const timerElement = document.getElementById('timer');
+    if (!timerElement) return;
+    
+    // If timer shows 00:00:00 and has been running for a while, it might be stuck
+    // Force restart if needed
+    if (timerElement.textContent === '00:00:00') {
+      // Check if there's a stored start time
+      const startTime = localStorage.getItem('examStartTime');
+      if (startTime) {
+        // Timer should be running but might be stuck, restart it
+        if (typeof startTimer === 'function') {
+          console.log('Restarting timer from exam.js');
+          startTimer();
+        }
+      }
+    }
+  }
+  
+  // Call this after page loads
+  setTimeout(ensureTimerRunning, 500);
+
+
   window.confirmEndExam = function () {
     const ok = confirm("End the Exam Now? This cannot be Undone.");
     if (!ok) {
