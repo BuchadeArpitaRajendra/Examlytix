@@ -116,6 +116,65 @@
         </div>
       </div>
     </div>
+    <!-- Results Modal -->
+<div id="resultsModal" class="modal">
+  <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-header" style="background: linear-gradient(135deg, var(--success) 0%, var(--primary) 100%);">
+      <h3><i class="bi bi-check-circle-fill"></i> Exam Completed</h3>
+      <button class="close-btn" onclick="closeResultsModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="modal-body" style="text-align: center; padding: var(--spacing-xl);">
+      <!-- Score Display -->
+      <div style="margin-bottom: var(--spacing-lg);">
+        <div style="font-size: 14px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Integrity Score</div>
+        <div id="resultScore" style="font-size: 64px; font-weight: 700; margin: 8px 0;">--</div>
+        <div style="font-size: 14px; color: var(--text-muted);">/ 100</div>
+      </div>
+      
+      <!-- Risk Level -->
+      <div id="resultRisk" style="margin-bottom: var(--spacing-lg);">
+        <span class="badge" style="font-size: 14px; padding: 6px 20px;">--</span>
+      </div>
+      
+      <!-- Statistics -->
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md); margin-bottom: var(--spacing-lg);">
+        <div style="background: var(--bg-alt); padding: var(--spacing-md); border-radius: var(--radius);">
+          <div style="font-size: 11px; color: var(--text-muted);">Tab Switches</div>
+          <div id="resultTabSwitches" style="font-size: 20px; font-weight: 700; color: var(--warning);">0</div>
+        </div>
+        <div style="background: var(--bg-alt); padding: var(--spacing-md); border-radius: var(--radius);">
+          <div style="font-size: 11px; color: var(--text-muted);">Face Absence</div>
+          <div id="resultAbsence" style="font-size: 20px; font-weight: 700; color: var(--danger);">0s</div>
+        </div>
+        <div style="background: var(--bg-alt); padding: var(--spacing-md); border-radius: var(--radius);">
+          <div style="font-size: 11px; color: var(--text-muted);">Total Events</div>
+          <div id="resultEvents" style="font-size: 20px; font-weight: 700; color: var(--primary);">0</div>
+        </div>
+        <div style="background: var(--bg-alt); padding: var(--spacing-md); border-radius: var(--radius);">
+          <div style="font-size: 11px; color: var(--text-muted);">Duration</div>
+          <div id="resultDuration" style="font-size: 20px; font-weight: 700; color: var(--accent);">00:00</div>
+        </div>
+      </div>
+      
+      <!-- Recommendation -->
+      <div id="resultRecommendation" style="padding: var(--spacing-md); border-radius: var(--radius); margin-bottom: var(--spacing-lg);">
+        <p style="margin: 0; font-size: 14px;">--</p>
+      </div>
+      
+      <!-- Buttons -->
+      <div class="btn-row" style="justify-content: center; margin-top: 0;">
+        <a id="resultViewReportBtn" href="#" class="btn btn-primary">
+          <i class="bi bi-file-earmark-text"></i> View Full Report
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">
+          <i class="bi bi-house"></i> Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 
     <footer class="legal">&copy; 2026 VigilProctor · Powered by Session-Audited SQLite & Haar-Cascade Detection Engine</footer>
   </div>

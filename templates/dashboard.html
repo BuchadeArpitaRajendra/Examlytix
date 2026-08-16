@@ -28,30 +28,58 @@
         <p class="subtitle">View your Exam Sessions, Integrity Scores, and Start New Monitoring Sessions.</p>
 
         <!-- Statistics Cards -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label"><i class="bi bi-clock-history"></i> Total Sessions</div>
-            <div class="stat-value">0</div>
-            <div class="stat-change">Exam sessions completed</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label"><i class="bi bi-camera-video"></i> Face Presence Ratio</div>
-            <div class="stat-value">100%</div>
-            <div class="stat-change positive"><i class="bi bi-arrow-up"></i> Excellent</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label"><i class="bi bi-exclamation-triangle"></i> Risk Level</div>
-            <div class="stat-value" style="font-size: 20px;">
-              <span class="badge badge-completed">LOW</span>
-            </div>
-            <div class="stat-change">No issues detected</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label"><i class="bi bi-shield-check"></i> Integrity Score</div>
-            <div class="stat-value" style="color: var(--success);">100</div>
-            <div class="stat-change positive">Good Standing</div>
-          </div>
-        </div>
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label"><i class="bi bi-clock-history"></i> Total Sessions</div>
+    <div class="stat-value">{{ sessions|length if sessions is defined else 0 }}</div>
+    <div class="stat-change">Exam sessions completed</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label"><i class="bi bi-camera-video"></i> Face Presence Ratio</div>
+    <div class="stat-value">
+      {% if face_presence_ratio is defined %}
+        {{ face_presence_ratio }}%
+      {% else %}
+        100%
+      {% endif %}
+    </div>
+    <div class="stat-change positive"><i class="bi bi-arrow-up"></i> 
+      {% if face_presence_ratio is defined and face_presence_ratio >= 90 %}
+        Excellent
+      {% elif face_presence_ratio is defined and face_presence_ratio >= 70 %}
+        Good
+      {% else %}
+        Needs Improvement
+      {% endif %}
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label"><i class="bi bi-list-check"></i> Events Logged</div>
+    <div class="stat-value">{{ events_logged if events_logged is defined else 0 }}</div>
+    <div class="stat-change">Total monitoring events</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label"><i class="bi bi-shield-check"></i> Integrity Score</div>
+    <div class="stat-value" style="color: 
+      {% if latest_session and latest_session['integrity_score'] is not none %}
+        {% if latest_session['integrity_score'] >= 90 %}var(--success){% elif latest_session['integrity_score'] >= 70 %}var(--warning){% else %}var(--danger){% endif %}
+      {% else %}var(--success){% endif %}
+    ;">
+      {% if latest_session and latest_session['integrity_score'] is not none %}
+        {{ latest_session['integrity_score'] }}
+      {% else %}
+        100
+      {% endif %}
+    </div>
+    <div class="stat-change positive">
+      {% if latest_session and latest_session['integrity_score'] is not none %}
+        {% if latest_session['integrity_score'] >= 90 %}Good Standing{% elif latest_session['integrity_score'] >= 70 %}Needs Review{% else %}Action Required{% endif %}
+      {% else %}
+        Good Standing
+      {% endif %}
+    </div>
+  </div>
+</div>
 
         <!-- Latest Session Card -->
         {% if latest_session %}
@@ -104,24 +132,30 @@
         {% endif %}
 
         <!-- Action Buttons -->
-        <div class="action-list" style="margin-bottom: 24px;">
-          {% if latest_session and latest_session['status'] == 'Paused' %}
-            <a class="btn btn-primary" href="{{ url_for('resume_exam') }}" style="gap: 8px;">
-              <i class="bi bi-play-fill"></i> Resume Monitoring Session
-            </a>
-          {% elif latest_session and latest_session['status'] == 'Running' %}
-            <a class="btn btn-primary" href="{{ url_for('exam') }}" style="gap: 8px;">
-              <i class="bi bi-camera-video-fill"></i> Continue Monitoring Session
-            </a>
-          {% else %}
-            <a class="btn btn-primary" href="{{ url_for('start_exam') }}" style="gap: 8px;">
-              <i class="bi bi-play-circle-fill"></i> Start New Exam
-            </a>
-          {% endif %}
-          <a class="btn btn-ghost" href="{{ url_for('summary', session_id=latest_session['session_id']) if latest_session else '#' }}" style="gap: 8px; {% if not latest_session or latest_session['status'] != 'Completed' %}opacity: 0.5; pointer-events: none;{% endif %}">
-            <i class="bi bi-file-earmark-pdf"></i> View Report
-          </a>
-        </div>
+<div class="action-list" style="margin-bottom: 24px;">
+  {% if latest_session and latest_session['status'] == 'Paused' %}
+    <a class="btn btn-primary" href="{{ url_for('resume_exam') }}" style="gap: 8px;">
+      <i class="bi bi-play-fill"></i> Resume Monitoring Session
+    </a>
+  {% elif latest_session and latest_session['status'] == 'Running' %}
+    <a class="btn btn-primary" href="{{ url_for('exam') }}" style="gap: 8px;">
+      <i class="bi bi-camera-video-fill"></i> Continue Monitoring Session
+    </a>
+  {% else %}
+    <a class="btn btn-primary" href="{{ url_for('start_exam') }}" style="gap: 8px;">
+      <i class="bi bi-play-circle-fill"></i> Start New Exam
+    </a>
+  {% endif %}
+  
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md);">
+    <a class="btn btn-ghost" href="{{ url_for('summary', session_id=latest_session['session_id']) if latest_session else '#' }}" style="gap: 8px; {% if not latest_session or latest_session['status'] != 'Completed' %}opacity: 0.5; pointer-events: none;{% endif %}">
+      <i class="bi bi-file-earmark-pdf"></i> View Report
+    </a>
+    <a class="btn btn-ghost" href="{{ url_for('export_data') if latest_session else '#' }}" style="gap: 8px; {% if not latest_session %}opacity: 0.5; pointer-events: none;{% endif %}">
+      <i class="bi bi-download"></i> Export Data
+    </a>
+  </div>
+</div>
 
         <!-- Recent Activity -->
         <p class="eyebrow" style="margin-top: 24px; margin-bottom: 12px;">

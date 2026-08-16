@@ -156,3 +156,17 @@ def update_integrity_score(cur, session_id, remarks):
         "UPDATE session SET integrity_score=? WHERE session_id=?",
         (score, session_id)
     )
+
+def get_sessions_by_candidate(candidate_id):
+    """Get all sessions for a specific candidate"""
+    con = get_connection()
+    cur = con.cursor()
+    cur.execute("""
+        SELECT *
+        FROM session
+        WHERE candidate_id=?
+        ORDER BY session_id DESC
+    """, (candidate_id,))
+    rows = cur.fetchall()
+    con.close()
+    return rows

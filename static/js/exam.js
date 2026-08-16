@@ -307,4 +307,101 @@
   startCamera();
   renderLog();
   fetchIntegrityScore();
+
+  // =============================================
+// RESULTS MODAL FUNCTIONS
+// =============================================
+
+function showResultsModal(data) {
+  const modal = document.getElementById('resultsModal');
+  if (!modal) return;
+  
+  // Set score with color
+  const score = data.integrity_score || 0;
+  const scoreEl = document.getElementById('resultScore');
+  scoreEl.textContent = score;
+  
+  // Color based on score
+  let color = 'var(--success)';
+  let riskLevel = 'Low';
+  let riskBadge = 'badge-completed';
+  let recommendation = 'No issues detected. Keep up the good work!';
+  let recBg = 'var(--success)';
+  
+  if (score >= 90) {
+    color = 'var(--success)';
+    riskLevel = 'Low Risk';
+    riskBadge = 'badge-completed';
+    recommendation = '✅ Excellent performance! No significant issues detected.';
+    recBg = 'rgba(52, 211, 153, 0.15)';
+  } else if (score >= 70) {
+    color = 'var(--warning)';
+    riskLevel = 'Medium Risk';
+    riskBadge = 'badge-paused';
+    recommendation = '⚠️ Some issues detected. Please review the event log for details.';
+    recBg = 'rgba(251, 191, 36, 0.15)';
+  } else if (score >= 50) {
+    color = 'var(--danger)';
+    riskLevel = 'High Risk';
+    riskBadge = 'badge-running';
+    recommendation = '⚠️ Significant issues detected. Investigation recommended.';
+    recBg = 'rgba(248, 113, 113, 0.15)';
+  } else {
+    color = 'var(--danger)';
+    riskLevel = 'Critical Risk';
+    riskBadge = 'badge-running';
+    recommendation = '🚨 Critical issues detected. Immediate investigation required.';
+    recBg = 'rgba(239, 68, 68, 0.2)';
+  }
+  
+  scoreEl.style.color = color;
+  
+  // Set risk badge
+  const riskEl = document.getElementById('resultRisk');
+  riskEl.innerHTML = `<span class="badge ${riskBadge}" style="font-size: 14px; padding: 6px 20px;">${riskLevel}</span>`;
+  
+  // Set statistics
+  document.getElementById('resultTabSwitches').textContent = data.tab_switches || 0;
+  document.getElementById('resultAbsence').textContent = (data.total_absence_duration || 0) + 's';
+  document.getElementById('resultEvents').textContent = data.total_events || 0;
+  
+  // Set duration
+  const duration = data.duration || 0;
+  const minutes = Math.floor(duration / 60);
+  const seconds = duration % 60;
+  document.getElementById('resultDuration').textContent = 
+    String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+  
+  // Set recommendation
+  const recEl = document.getElementById('resultRecommendation');
+  recEl.style.background = recBg;
+  recEl.style.border = `1px solid ${color}`;
+  recEl.innerHTML = `<p style="margin: 0; font-size: 14px; color: var(--text);">${recommendation}</p>`;
+  
+  // Set view report button
+  document.getElementById('resultViewReportBtn').href = '/summary/' + data.session_id;
+  
+  // Show modal
+  modal.classList.add('show');
+}
+
+function closeResultsModal() {
+  const modal = document.getElementById('resultsModal');
+  if (modal) modal.classList.remove('show');
+}
+
+// Close modal on click outside
+window.onclick = function(event) {
+  const modal = document.getElementById('resultsModal');
+  if (event.target === modal) {
+    closeResultsModal();
+  }
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeResultsModal();
+  }
+});
 })();
