@@ -32,11 +32,18 @@ def admin_dashboard():
     candidates = database.get_all_candidates()
     sessions = database.get_all_sessions()
     events = database.get_all_events()
+    
+    # Convert to dict for JSON serialization
+    candidates_dict = [dict(c) for c in candidates]
+    sessions_dict = [dict(s) for s in sessions]
+    events_dict = [dict(e) for e in events]
+    
     integrity_scores = [
         s["integrity_score"]
         for s in sessions
         if s["integrity_score"] is not None
     ]
+    
     analytics = {
         "total_candidates": len(candidates),
         "total_sessions": len(sessions),
@@ -156,22 +163,32 @@ def admin_dashboard():
         "70-84": sum(1 for s in integrity_scores if 70 <= s < 85),
         "85-100": sum(1 for s in integrity_scores if s >= 85),
     }
+    
     if candidate_filter:
         candidate_filter = candidate_filter.upper()
         events = [
             e for e in events
             if candidate_filter in str(e["candidate_id"]).upper()
         ]
+        # Also convert filtered events to dict
+        events_dict = [dict(e) for e in events]
+    else:
+        events_dict = events_dict
+    
     if event_filter:
         events = [
             e for e in events
             if e["event_type"] == event_filter
         ]
+        events_dict = [dict(e) for e in events]
+    
     if date_filter:
         events = [
             e for e in events
             if str(e["timestamp"]).startswith(date_filter)
         ]
+        events_dict = [dict(e) for e in events]
+    
     event_types = [
         "Face Not Detected",
         "Face Detected",
@@ -182,12 +199,13 @@ def admin_dashboard():
         "Exam Started",
         "Exam Ended",
     ]
+    
     return render_template(
         "admin.html",
         datetime=datetime,
-        candidates=candidates,
-        sessions=sessions,
-        events=events,
+        candidates=candidates_dict,
+        sessions=sessions_dict,
+        events=events_dict,
         analytics=analytics,
         event_types=event_types,
     )

@@ -27,7 +27,7 @@ WHERE email=?
     """, (email,))
     row = cur.fetchone()
     con.close()
-    return row
+    return dict(row) if row else None
 
 def get_candidate_by_id(candidate_id):
     con = get_connection()
@@ -40,7 +40,7 @@ WHERE candidate_id=?
     """, (candidate_id,))
     row = cur.fetchone()
     con.close()
-    return row
+    return dict(row) if row else None
 
 def login(email, password):
     con = get_connection()
@@ -52,4 +52,4 @@ WHERE email=? AND password=?
     """, (email, password))
     user = cur.fetchone()
     con.close()
-    return user
+    return dict(user) if user else None

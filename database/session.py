@@ -25,7 +25,7 @@ LIMIT 1
     """, (candidate_id,))
     row = cur.fetchone()
     con.close()
-    return row
+    return dict(row) if row else None
 
 def start_session(candidate_id):
     con = get_connection()
@@ -69,7 +69,7 @@ def get_session(session_id):
     cur.execute("SELECT * FROM session WHERE session_id=?", (session_id,))
     row = cur.fetchone()
     con.close()
-    return row
+    return dict(row) if row else None
 
 def update_monitor_state(session_id, total_absence_duration, current_absence_start, total_tab_switches, face_present, face_missing_logged, prolonged_logged):
     con = get_connection()
@@ -106,7 +106,7 @@ WHERE session_id=?
     """,(session_id,))
     row = cur.fetchone()
     con.close()
-    return row
+    return dict(row) if row else None
 
 def increment_tab_switch(session_id):
     con = get_connection()
@@ -140,7 +140,7 @@ WHERE session_id=?
     """,(session_id,))
     row = cur.fetchone()
     con.close()
-    return row
+    return dict(row) if row else None
 
 def update_integrity_score(cur, session_id, remarks):
     deduction = INTEGRITY_RULES.get(remarks)
@@ -150,12 +150,14 @@ def update_integrity_score(cur, session_id, remarks):
         "SELECT integrity_score FROM session WHERE session_id=?",
         (session_id,)
     )
-    score = cur.fetchone()["integrity_score"]
-    score = max(0, score - deduction)
-    cur.execute(
-        "UPDATE session SET integrity_score=? WHERE session_id=?",
-        (score, session_id)
-    )
+    row = cur.fetchone()
+    if row:
+        score = row["integrity_score"]
+        score = max(0, score - deduction)
+        cur.execute(
+            "UPDATE session SET integrity_score=? WHERE session_id=?",
+            (score, session_id)
+        )
 
 def get_sessions_by_candidate(candidate_id):
     """Get all sessions for a specific candidate"""
@@ -169,4 +171,4 @@ def get_sessions_by_candidate(candidate_id):
     """, (candidate_id,))
     rows = cur.fetchall()
     con.close()
-    return rows
+    return [dict(row) for row in rows]

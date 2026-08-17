@@ -9,7 +9,8 @@ def get_all_candidates():
     cur.execute("SELECT * FROM candidate ORDER BY candidate_id")
     rows = cur.fetchall()
     con.close()
-    return rows
+    # Convert to list of dicts
+    return [dict(row) for row in rows]
 
 def get_all_sessions():
     con = get_connection()
@@ -22,7 +23,7 @@ ORDER BY session.session_id DESC
     """)
     rows = cur.fetchall()
     con.close()
-    return rows
+    return [dict(row) for row in rows]
 
 def get_all_events():
     con = get_connection()
@@ -30,7 +31,7 @@ def get_all_events():
     cur.execute("SELECT * FROM event_log ORDER BY event_id DESC")
     rows = cur.fetchall()
     con.close()
-    return rows
+    return [dict(row) for row in rows]
 
 def update_candidate_fields(candidate_id, fields):
     allowed = {"name", "email", "password", "age", "exam_subject"}

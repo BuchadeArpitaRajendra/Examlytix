@@ -28,7 +28,7 @@ ORDER BY event_id
     """, (session_id,))
     rows = cur.fetchall()
     con.close()
-    return rows
+    return [dict(row) for row in rows]
 
 def get_event(event_id):
     con = get_connection()
@@ -40,4 +40,4 @@ WHERE event_id=?
     """, (event_id,))
     row = cur.fetchone()
     con.close()
-    return row
+    return dict(row) if row else None
