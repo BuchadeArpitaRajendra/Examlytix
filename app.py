@@ -1,7 +1,7 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 
 import database
-from config import SECRET_KEY, FLASK_HOST, FLASK_PORT, FLASK_DEBUG
+from config import SECRET_KEY, FLASK_HOST, FLASK_PORT, FLASK_DEBUG, PHOTO_FOLDER
 
 app = Flask("VigilProctor")
 app.secret_key = SECRET_KEY

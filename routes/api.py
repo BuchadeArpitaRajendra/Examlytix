@@ -20,9 +20,9 @@ def api_detect_face():
     payload = request.get_json(silent=True) or {}
     image_data = payload.get("image")
     if not image_data:
-        return jsonify({""
-        "error": "No Image Provided"
-    }), 400
+        return jsonify({
+            "error": "No Image Provided"
+        }), 400  # <-- Fixed: removed empty string
     try:
         frame = decode_data_url_image(image_data)
     except Exception:
@@ -93,7 +93,7 @@ def api_detect_face():
                 )
             else:
                 database.log_event(
-                    candidate_id, session_id, "Face Not Detected", "Multiple  Faces are Visible"
+                    candidate_id, session_id, "Face Not Detected", "Multiple Faces are Visible"
                 )
             face_missing_logged = True
         if absence_duration >= 5 and not prolonged_logged:

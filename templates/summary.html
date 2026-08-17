@@ -21,27 +21,30 @@
 
     <div class="stage">
       <div class="panel card xwide">
-        <!-- Header Section -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
-          <div>
-            <p class="eyebrow"><i class="bi bi-receipt"></i> Session Report</p>
-            <h1 class="title">Exam Summary #{{ db_session['session_id'] }}</h1>
-            <p class="subtitle">Thank you for completing your exam. Below is your detailed integrity report.</p>
-          </div>
-          <div style="text-align: right; padding: 16px; background: linear-gradient(135deg, #dbeafe 0%, #cffafe 100%); border-radius: var(--radius-lg); border: 1px solid #bae6fd;">
-            <div style="font-size: 12px; color: #0ea5e9; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Integrity Score</div>
-            <div style="font-size: 40px; font-weight: 700; color: {% if db_session['integrity_score'] >= 90 %}var(--success){% elif db_session['integrity_score'] >= 75 %}var(--warning){% else %}var(--danger){% endif %}; margin: 8px 0;">
-              {{ db_session['integrity_score'] }}<span style="font-size: 20px;">/100</span>
-            </div>
-            {% if db_session['integrity_score'] >= 90 %}
-              <div style="font-size: 11px; color: var(--success); font-weight: 600;">✓ Excellent Standing</div>
-            {% elif db_session['integrity_score'] >= 75 %}
-              <div style="font-size: 11px; color: var(--warning); font-weight: 600;">⚠ Needs Review</div>
-            {% else %}
-              <div style="font-size: 11px; color: var(--danger); font-weight: 600;">✕ Action Required</div>
-            {% endif %}
-          </div>
-        </div>
+       <!-- Header Section - Fix Score Display -->
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+  <div>
+    <p class="eyebrow"><i class="bi bi-receipt"></i> Session Report</p>
+    <h1 class="title">Exam Summary #{{ db_session['session_id'] }}</h1>
+    <p class="subtitle">Thank you for completing your exam. Below is your detailed integrity report.</p>
+  </div>
+  <div style="text-align: right; padding: 16px; background: linear-gradient(135deg, #dbeafe 0%, #cffafe 100%); border-radius: var(--radius-lg); border: 1px solid #bae6fd;">
+    <div style="font-size: 12px; color: #0ea5e9; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Integrity Score</div>
+    {% set score = db_session['integrity_score']|int %}
+    <div style="font-size: 40px; font-weight: 700; color: {% if score >= 90 %}var(--success){% elif score >= 75 %}var(--warning){% else %}var(--danger){% endif %}; margin: 8px 0;">
+      {{ score }}<span style="font-size: 20px;">/100</span>
+    </div>
+    {% if score >= 90 %}
+      <div style="font-size: 11px; color: var(--success); font-weight: 600;">✓ Excellent Standing</div>
+    {% elif score >= 75 %}
+      <div style="font-size: 11px; color: var(--warning); font-weight: 600;">⚠ Needs Review</div>
+    {% elif score >= 50 %}
+      <div style="font-size: 11px; color: var(--danger); font-weight: 600;">⚠ Issues Detected</div>
+    {% else %}
+      <div style="font-size: 11px; color: #dc2626; font-weight: 600;">✕ Critical Issues</div>
+    {% endif %}
+  </div>
+</div> 
 
         <!-- Session Information Cards -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
@@ -92,22 +95,25 @@
           </div>
         </div>
 
-        <!-- Risk Level & Recommendation -->
-        <div class="evidence-stats">
-          <i class="bi bi-shield-exclamation"></i>
-          <div class="evidence-stats-text">
-            <h4>Risk Assessment</h4>
-            <p>
-              {% if db_session['integrity_score'] >= 90 %}
-                Your exam integrity is <strong>Excellent</strong>. No issues were detected during the monitoring period.
-              {% elif db_session['integrity_score'] >= 75 %}
-                Your exam integrity is <strong>Good</strong>, but there are minor concerns that require review.
-              {% else %}
-                Your exam integrity has <strong>Significant Issues</strong> that require immediate investigation.
-              {% endif %}
-            </p>
-          </div>
-        </div>
+        <!-- Risk Level & Recommendation - FIXED -->
+<div class="evidence-stats">
+  <i class="bi bi-shield-exclamation"></i>
+  <div class="evidence-stats-text">
+    <h4>Risk Assessment</h4>
+    <p>
+      {% set score = db_session['integrity_score']|int %}
+      {% if score >= 90 %}
+        ✅ Your exam integrity is <strong style="color: var(--success);">Excellent</strong>. No issues were detected during the monitoring period.
+      {% elif score >= 75 %}
+        ⚠️ Your exam integrity is <strong style="color: var(--warning);">Good</strong>, but there are minor concerns that require review.
+      {% elif score >= 50 %}
+        ⚠️ Your exam integrity has <strong style="color: var(--danger);">Significant Issues</strong> that require investigation.
+      {% else %}
+        🚨 Your exam integrity has <strong style="color: #dc2626;">Critical Issues</strong> that require immediate investigation.
+      {% endif %}
+    </p>
+  </div>
+</div>
 
         <!-- Legend -->
         <div class="summary-legend" style="margin-top: 24px;">

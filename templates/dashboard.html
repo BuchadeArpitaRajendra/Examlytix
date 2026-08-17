@@ -27,7 +27,7 @@
         <h1 class="title"><i class="bi bi-house-fill"></i> Dashboard</h1>
         <p class="subtitle">View your Exam Sessions, Integrity Scores, and Start New Monitoring Sessions.</p>
 
-        <!-- Statistics Cards -->
+        <!-- Statistics Cards - Fix Integrity Score -->
 <div class="stats-grid">
   <div class="stat-card">
     <div class="stat-label"><i class="bi bi-clock-history"></i> Total Sessions</div>
@@ -60,24 +60,25 @@
   </div>
   <div class="stat-card">
     <div class="stat-label"><i class="bi bi-shield-check"></i> Integrity Score</div>
-    <div class="stat-value" style="color: 
-      {% if latest_session and latest_session['integrity_score'] is not none %}
-        {% if latest_session['integrity_score'] >= 90 %}var(--success){% elif latest_session['integrity_score'] >= 70 %}var(--warning){% else %}var(--danger){% endif %}
-      {% else %}var(--success){% endif %}
-    ;">
-      {% if latest_session and latest_session['integrity_score'] is not none %}
-        {{ latest_session['integrity_score'] }}
-      {% else %}
-        100
-      {% endif %}
-    </div>
-    <div class="stat-change positive">
-      {% if latest_session and latest_session['integrity_score'] is not none %}
-        {% if latest_session['integrity_score'] >= 90 %}Good Standing{% elif latest_session['integrity_score'] >= 70 %}Needs Review{% else %}Action Required{% endif %}
-      {% else %}
-        Good Standing
-      {% endif %}
-    </div>
+    {% if latest_session and latest_session['integrity_score'] is not none %}
+      {% set score = latest_session['integrity_score']|int %}
+      <div class="stat-value" style="color: 
+        {% if score >= 90 %}var(--success)
+        {% elif score >= 75 %}var(--warning)
+        {% else %}var(--danger){% endif %}
+      ;">
+        {{ score }}
+      </div>
+      <div class="stat-change positive">
+        {% if score >= 90 %}Good Standing
+        {% elif score >= 75 %}Needs Review
+        {% elif score >= 50 %}Issues Detected
+        {% else %}Critical Issues{% endif %}
+      </div>
+    {% else %}
+      <div class="stat-value" style="color: var(--success);">100</div>
+      <div class="stat-change positive">Good Standing</div>
+    {% endif %}
   </div>
 </div>
 

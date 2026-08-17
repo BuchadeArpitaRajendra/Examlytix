@@ -13,8 +13,7 @@ def dashboard():
     candidate_id = session["candidate_id"]
     latest = database.get_latest_session(candidate_id)
     
-    # Get all sessions for the candidate - using existing function
-    # Since get_sessions_by_candidate might not exist, let's use a different approach
+    # Get all sessions for the candidate
     all_sessions = []
     if latest:
         # Get all sessions by querying directly
@@ -178,11 +177,18 @@ def end_exam():
     # Get events count
     total_events = len(events)
     
+    # Get integrity score - ensure it's an integer
+    integrity_score = updated_session["integrity_score"]
+    if integrity_score is None:
+        integrity_score = 100
+    else:
+        integrity_score = int(integrity_score)
+    
     # Store data in session for results modal
     session["exam_results"] = {
-        "integrity_score": updated_session["integrity_score"],
-        "tab_switches": updated_session["total_tab_switches"],
-        "total_absence_duration": updated_session["total_absence_duration"],
+        "integrity_score": integrity_score,
+        "tab_switches": updated_session["total_tab_switches"] or 0,
+        "total_absence_duration": updated_session["total_absence_duration"] or 0,
         "total_events": total_events,
         "duration": duration_seconds,
         "session_id": session_id
@@ -214,7 +220,7 @@ def export_data():
     """Export all candidate data as CSV"""
     candidate_id = session["candidate_id"]
     candidate = database.get_candidate_by_id(candidate_id)
-    sessions = database.get_sessions_by_candidate(candidate_id)
+    sessions = database.get_sessions_by_candidate(candidate_id)  # Now this function exists
     
     import csv
     from io import StringIO

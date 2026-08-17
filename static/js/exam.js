@@ -17,34 +17,14 @@
   let cameraStream = null;
   let detectorTimer = null;
   let examEnding = false;
+  let lastFaceDetected = true;
+  let lastStatus = window.EXAM_STATUS || 'Running';
+  let isWindowFocused = true;
+  let isPageVisible = true;
 
   // =============================================
-  // ENSURE TIMER IS RUNNING
+  // CONFIRM END EXAM
   // =============================================
-  function ensureTimerRunning() {
-    // Check if timer is already running
-    const timerElement = document.getElementById('timer');
-    if (!timerElement) return;
-    
-    // If timer shows 00:00:00 and has been running for a while, it might be stuck
-    // Force restart if needed
-    if (timerElement.textContent === '00:00:00') {
-      // Check if there's a stored start time
-      const startTime = localStorage.getItem('examStartTime');
-      if (startTime) {
-        // Timer should be running but might be stuck, restart it
-        if (typeof startTimer === 'function') {
-          console.log('Restarting timer from exam.js');
-          startTimer();
-        }
-      }
-    }
-  }
-  
-  // Call this after page loads
-  setTimeout(ensureTimerRunning, 500);
-
-
   window.confirmEndExam = function () {
     const ok = confirm("End the Exam Now? This cannot be Undone.");
     if (!ok) {
@@ -57,6 +37,9 @@
     return false;
   };
 
+  // =============================================
+  // LOG FUNCTIONS
+  // =============================================
   function addLogRow(eventType, remarks) {
     const time = new Date().toLocaleTimeString();
     logRows.unshift({ time, eventType, remarks });
@@ -87,6 +70,9 @@
     `).join("");
   }
 
+  // =============================================
+  // CAMERA FUNCTIONS
+  // =============================================
   async function startCamera() {
     try {
       cameraStream = await navigator.mediaDevices.getUserMedia({
@@ -126,6 +112,12 @@
     statusText.textContent = text;
     statusChip.classList.toggle("warn", !!warn);
     viewfinder.classList.toggle("alert-state", !!warn);
+    // Update face status text
+    const faceStatusEl = document.getElementById('faceStatusText');
+    if (faceStatusEl) {
+      faceStatusEl.textContent = text;
+      faceStatusEl.parentElement.style.color = warn ? 'var(--danger)' : 'var(--success)';
+    }
   }
 
   function captureFrame() {
@@ -151,18 +143,27 @@
       if (!res.ok)
         return;
       const data = await res.json();
-      document.getElementById("integrityScore").textContent =
-        data.integrity_score + "%";
+      const scoreEl = document.getElementById("integrityScore");
+      if (scoreEl) {
+        scoreEl.textContent = data.integrity_score + "%";
+        // Update color based on score
+        const score = data.integrity_score;
+        if (score >= 90) {
+          scoreEl.style.color = 'var(--success)';
+        } else if (score >= 70) {
+          scoreEl.style.color = 'var(--warning)';
+        } else {
+          scoreEl.style.color = 'var(--danger)';
+        }
+      }
     } catch (err) {
       console.error(err);
     }
   }
 
-  let lastFaceDetected = true;
-  let lastStatus = window.EXAM_STATUS;
-  let isWindowFocused = true;
-  let isPageVisible = true;
-
+  // =============================================
+  // DETECTION LOOP
+  // =============================================
   async function detectTick() {
     if (detecting || !video.videoWidth) return;
     detecting = true;
@@ -222,9 +223,6 @@
         if (lastFaceDetected)
           addLogRow("Face Not Detected", "Candidate's Face is Not Visible");
         setStatus(`Face Not Detected · ${data.absence_duration}s`, true);
-        if (data.absence_duration >= 10 && data.absence_duration % 10 < 2) {
-          // Avoid Log Spam
-        }
       }
       lastFaceDetected = data.face_detected;
       currentAbsenceEl.textContent = `${data.absence_duration}s`;
@@ -248,6 +246,9 @@
     );
   }
 
+  // =============================================
+  // TAB EVENT HANDLING
+  // =============================================
   function reportTabEvent(eventType, remarks) {
     if(lastStatus !== "Running")
       return;
@@ -270,7 +271,7 @@
         .catch(() => {});
   }
 
-  // Tab is Hidden or Become Visible Again (Tab Switch, Browser Minimize, System Locked)
+  // Tab is Hidden or Become Visible Again
   document.addEventListener("visibilitychange", function () {
     if (examEnding)
       return;
@@ -282,7 +283,7 @@
     }
   });
 
-  // Tab Loses or Gains Focus (Clicked Another Application with Tab Visible)
+  // Tab Loses or Gains Focus
   window.addEventListener("blur", function () {
     if (examEnding)
       return;
@@ -304,104 +305,11 @@
     }
   });
 
+  // =============================================
+  // INITIALIZATION
+  // =============================================
   startCamera();
   renderLog();
   fetchIntegrityScore();
 
-  // =============================================
-// RESULTS MODAL FUNCTIONS
-// =============================================
-
-function showResultsModal(data) {
-  const modal = document.getElementById('resultsModal');
-  if (!modal) return;
-  
-  // Set score with color
-  const score = data.integrity_score || 0;
-  const scoreEl = document.getElementById('resultScore');
-  scoreEl.textContent = score;
-  
-  // Color based on score
-  let color = 'var(--success)';
-  let riskLevel = 'Low';
-  let riskBadge = 'badge-completed';
-  let recommendation = 'No issues detected. Keep up the good work!';
-  let recBg = 'var(--success)';
-  
-  if (score >= 90) {
-    color = 'var(--success)';
-    riskLevel = 'Low Risk';
-    riskBadge = 'badge-completed';
-    recommendation = '✅ Excellent performance! No significant issues detected.';
-    recBg = 'rgba(52, 211, 153, 0.15)';
-  } else if (score >= 70) {
-    color = 'var(--warning)';
-    riskLevel = 'Medium Risk';
-    riskBadge = 'badge-paused';
-    recommendation = '⚠️ Some issues detected. Please review the event log for details.';
-    recBg = 'rgba(251, 191, 36, 0.15)';
-  } else if (score >= 50) {
-    color = 'var(--danger)';
-    riskLevel = 'High Risk';
-    riskBadge = 'badge-running';
-    recommendation = '⚠️ Significant issues detected. Investigation recommended.';
-    recBg = 'rgba(248, 113, 113, 0.15)';
-  } else {
-    color = 'var(--danger)';
-    riskLevel = 'Critical Risk';
-    riskBadge = 'badge-running';
-    recommendation = '🚨 Critical issues detected. Immediate investigation required.';
-    recBg = 'rgba(239, 68, 68, 0.2)';
-  }
-  
-  scoreEl.style.color = color;
-  
-  // Set risk badge
-  const riskEl = document.getElementById('resultRisk');
-  riskEl.innerHTML = `<span class="badge ${riskBadge}" style="font-size: 14px; padding: 6px 20px;">${riskLevel}</span>`;
-  
-  // Set statistics
-  document.getElementById('resultTabSwitches').textContent = data.tab_switches || 0;
-  document.getElementById('resultAbsence').textContent = (data.total_absence_duration || 0) + 's';
-  document.getElementById('resultEvents').textContent = data.total_events || 0;
-  
-  // Set duration
-  const duration = data.duration || 0;
-  const minutes = Math.floor(duration / 60);
-  const seconds = duration % 60;
-  document.getElementById('resultDuration').textContent = 
-    String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
-  
-  // Set recommendation
-  const recEl = document.getElementById('resultRecommendation');
-  recEl.style.background = recBg;
-  recEl.style.border = `1px solid ${color}`;
-  recEl.innerHTML = `<p style="margin: 0; font-size: 14px; color: var(--text);">${recommendation}</p>`;
-  
-  // Set view report button
-  document.getElementById('resultViewReportBtn').href = '/summary/' + data.session_id;
-  
-  // Show modal
-  modal.classList.add('show');
-}
-
-function closeResultsModal() {
-  const modal = document.getElementById('resultsModal');
-  if (modal) modal.classList.remove('show');
-}
-
-// Close modal on click outside
-window.onclick = function(event) {
-  const modal = document.getElementById('resultsModal');
-  if (event.target === modal) {
-    closeResultsModal();
-  }
-}
-
-// Close modal on Escape key
-document.addEventListener('keydown', function(event) {
-  if (event.key === 'Escape') {
-    closeResultsModal();
-  }
-});
 })();

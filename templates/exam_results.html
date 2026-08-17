@@ -23,9 +23,10 @@
         <!-- Header -->
         <div style="margin-bottom: var(--spacing-lg);">
           <div style="font-size: 48px; margin-bottom: var(--spacing-sm);">
-            {% if results.integrity_score >= 90 %}
+            {% set score = results.integrity_score|int %}
+            {% if score >= 90 %}
               <i class="bi bi-check-circle-fill" style="color: var(--success);"></i>
-            {% elif results.integrity_score >= 70 %}
+            {% elif score >= 75 %}
               <i class="bi bi-exclamation-triangle-fill" style="color: var(--warning);"></i>
             {% else %}
               <i class="bi bi-x-circle-fill" style="color: var(--danger);"></i>
@@ -38,26 +39,36 @@
         <!-- Score Display -->
         <div style="margin-bottom: var(--spacing-lg);">
           <div style="font-size: 14px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Integrity Score</div>
-          <div style="font-size: 72px; font-weight: 700; margin: 8px 0; color: 
-            {% if results.integrity_score >= 90 %}var(--success)
-            {% elif results.integrity_score >= 70 %}var(--warning)
-            {% else %}var(--danger){% endif %}
+          {% set score = results.integrity_score|int %}
+          <div style="font-size: 72px; font-weight: 700; margin: 8px 0; 
+            {% if score >= 90 %}color: var(--success);
+            {% elif score >= 75 %}color: var(--warning);
+            {% else %}color: var(--danger);{% endif %}
           ;">
-            {{ results.integrity_score }}
+            {{ score }}
           </div>
           <div style="font-size: 16px; color: var(--text-muted);">/ 100</div>
         </div>
 
-        <!-- Risk Level -->
+        <!-- Risk Level - FIXED CLASSIFICATION -->
         <div style="margin-bottom: var(--spacing-lg);">
-          {% if results.integrity_score >= 90 %}
-            <span class="badge badge-completed" style="font-size: 16px; padding: 8px 24px;">Low Risk</span>
-          {% elif results.integrity_score >= 70 %}
-            <span class="badge badge-paused" style="font-size: 16px; padding: 8px 24px;">Medium Risk</span>
-          {% elif results.integrity_score >= 50 %}
-            <span class="badge badge-running" style="font-size: 16px; padding: 8px 24px; background: rgba(248,113,113,0.2); color: #fca5a5; border-color: rgba(248,113,113,0.3);">High Risk</span>
+          {% set score = results.integrity_score|int %}
+          {% if score >= 90 %}
+            <span class="badge badge-completed" style="font-size: 16px; padding: 8px 24px; background: rgba(52, 211, 153, 0.2); color: #6ee7b7; border: 1px solid rgba(52, 211, 153, 0.3);">
+              <i class="bi bi-shield-check"></i> Low Risk
+            </span>
+          {% elif score >= 75 %}
+            <span class="badge badge-paused" style="font-size: 16px; padding: 8px 24px; background: rgba(251, 191, 36, 0.2); color: #fcd34d; border: 1px solid rgba(251, 191, 36, 0.3);">
+              <i class="bi bi-exclamation-triangle"></i> Medium Risk
+            </span>
+          {% elif score >= 50 %}
+            <span class="badge" style="font-size: 16px; padding: 8px 24px; background: rgba(248, 113, 113, 0.2); color: #fca5a5; border: 1px solid rgba(248, 113, 113, 0.3);">
+              <i class="bi bi-exclamation-circle"></i> High Risk
+            </span>
           {% else %}
-            <span class="badge badge-running" style="font-size: 16px; padding: 8px 24px; background: rgba(239,68,68,0.3); color: #fca5a5; border-color: rgba(239,68,68,0.5);">Critical Risk</span>
+            <span class="badge" style="font-size: 16px; padding: 8px 24px; background: rgba(239, 68, 68, 0.3); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.5);">
+              <i class="bi bi-x-octagon"></i> Critical Risk
+            </span>
           {% endif %}
         </div>
 
@@ -85,22 +96,20 @@
           </div>
         </div>
 
-        <!-- Recommendation -->
-        <div style="padding: var(--spacing-md); border-radius: var(--radius); margin-bottom: var(--spacing-lg); background: 
-          {% if results.integrity_score >= 90 %}rgba(52, 211, 153, 0.15)
-          {% elif results.integrity_score >= 70 %}rgba(251, 191, 36, 0.15)
-          {% else %}rgba(248, 113, 113, 0.15){% endif %}
-        ; border: 1px solid 
-          {% if results.integrity_score >= 90 %}var(--success)
-          {% elif results.integrity_score >= 70 %}var(--warning)
-          {% else %}var(--danger){% endif %}
+        <!-- Recommendation - FIXED WITH CORRECT RANGES -->
+        <div style="padding: var(--spacing-md); border-radius: var(--radius); margin-bottom: var(--spacing-lg); 
+          {% set score = results.integrity_score|int %}
+          {% if score >= 90 %}background: rgba(52, 211, 153, 0.15); border: 1px solid var(--success);
+          {% elif score >= 75 %}background: rgba(251, 191, 36, 0.15); border: 1px solid var(--warning);
+          {% else %}background: rgba(248, 113, 113, 0.15); border: 1px solid var(--danger);{% endif %}
         ;">
           <p style="margin: 0; font-size: 14px; color: var(--text);">
-            {% if results.integrity_score >= 90 %}
+            {% set score = results.integrity_score|int %}
+            {% if score >= 90 %}
               ✅ Excellent performance! No significant issues detected.
-            {% elif results.integrity_score >= 70 %}
-              ⚠️ Some issues detected. Please review the event log for details.
-            {% elif results.integrity_score >= 50 %}
+            {% elif score >= 75 %}
+              ⚠️ Some minor issues detected. Please review the event log for details.
+            {% elif score >= 50 %}
               ⚠️ Significant issues detected. Investigation recommended.
             {% else %}
               🚨 Critical issues detected. Immediate investigation required.

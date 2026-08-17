@@ -132,36 +132,42 @@
               <div class="value">{{ analytics.screenshots_captured }}</div>
             </div>
           </div>
-        </div>
 
-        <!-- Risk Distribution Pie Chart -->
-        <div style="margin-top: var(--spacing-xl);">
-          <p class="eyebrow" style="margin-bottom:16px;">
-            <i class="bi bi-pie-chart-fill"></i> Integrity Risk Distribution
-          </p>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
-            <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border);">
-              <canvas id="riskPieChart" style="max-height: 300px; max-width: 100%;"></canvas>
-            </div>
-            <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border);">
-              <div id="riskStudentList">
-                <div style="text-align: center; color: var(--text-muted); padding: 20px 0;">
-                  <i class="bi bi-hand-index" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
-                  <p>Click on any pie chart segment to view students</p>
+                    <!-- ============================================ -->
+          <!-- RISK DISTRIBUTION CHART - LARGER VERSION -->
+          <!-- ============================================ -->
+          <div style="margin-top: var(--spacing-xl);">
+            <p class="eyebrow" style="margin-bottom:16px; font-size: 14px;">
+              <i class="bi bi-pie-chart-fill"></i> Integrity Risk Distribution
+            </p>
+            
+            <!-- Full width layout -->
+            <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-lg);">
+              <!-- Pie Chart - Larger -->
+              <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-xl); border: 1px solid var(--border); min-height: 400px; display: flex; align-items: center; justify-content: center;">
+                <canvas id="riskPieChart" style="max-height: 380px; max-width: 100%; width: 100%; height: auto;"></canvas>
+              </div>
+              
+              <!-- Student List - Larger -->
+              <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-xl); border: 1px solid var(--border); min-height: 400px;">
+                <div id="riskStudentList" style="height: 100%;">
+                  <div style="text-align: center; color: var(--text-muted); padding: 60px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                    <i class="bi bi-hand-index" style="font-size: 48px; display: block; margin-bottom: 16px;"></i>
+                    <p style="font-size: 16px;">Click on any pie chart segment to view students</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Risk Legend -->
-        <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap; margin-top: var(--spacing-md); padding: var(--spacing-md); background: var(--bg-alt); border-radius: var(--radius); border: 1px solid var(--border);">
-          <span class="legend-title"><i class="bi bi-key"></i> Risk Levels</span>
-          <span><span class="legend-dot" style="background: var(--success);"></span> Low Risk (≥90)</span>
-          <span><span class="legend-dot" style="background: var(--warning);"></span> Medium Risk (75-89)</span>
-          <span><span class="legend-dot" style="background: var(--danger);"></span> High Risk (50-74)</span>
-          <span><span class="legend-dot" style="background: #dc2626;"></span> Critical (&lt;50)</span>
-        </div>
+          <!-- Risk Legend - Styled nicer -->
+          <div style="display: flex; gap: var(--spacing-xl); flex-wrap: wrap; margin-top: var(--spacing-lg); padding: var(--spacing-lg) var(--spacing-xl); background: var(--bg-alt); border-radius: var(--radius); border: 1px solid var(--border);">
+            <span class="legend-title" style="font-size: 13px;"><i class="bi bi-key"></i> Risk Levels</span>
+            <span style="font-size: 14px; display: flex; align-items: center; gap: 6px;"><span class="legend-dot" style="background: var(--success); width: 16px; height: 16px;"></span> Low Risk (≥90)</span>
+            <span style="font-size: 14px; display: flex; align-items: center; gap: 6px;"><span class="legend-dot" style="background: var(--warning); width: 16px; height: 16px;"></span> Medium Risk (75-89)</span>
+            <span style="font-size: 14px; display: flex; align-items: center; gap: 6px;"><span class="legend-dot" style="background: var(--danger); width: 16px; height: 16px;"></span> High Risk (50-74)</span>
+            <span style="font-size: 14px; display: flex; align-items: center; gap: 6px;"><span class="legend-dot" style="background: #dc2626; width: 16px; height: 16px;"></span> Critical (&lt;50)</span>
+          </div>
 
         <!-- ============================================ -->
         <!-- CANDIDATES TAB -->
@@ -292,427 +298,390 @@
         </div>
 
         <!-- ============================================ -->
-<!-- EVENT LOGS TAB - COMPACT -->
-<!-- ============================================ -->
-<div class="admin-panel-body" id="tab-events">
-  <div class="admin-table-wrap">
-    <div class="table-toolbar">
-      <span class="count"><i class="bi bi-list-check"></i> {{ events|length }} Event(s)</span>
-      <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap; align-items: center;">
-        <form method="GET" action="{{ url_for('admin_dashboard') }}" class="filter-form" style="gap: var(--spacing-sm); flex-wrap: wrap;">
-          <input type="text" name="candidate_id" placeholder="CID" value="{{ request.args.get('candidate_id', '') }}" style="min-width: 50px; padding: 3px 6px; font-size: 10px; width: 60px;">
-          <select name="event_type" style="min-width: 90px; padding: 3px 6px; font-size: 10px;">
-            <option value="">All Events</option>
-            {% for t in event_types %}
-            <option value="{{ t }}" {% if request.args.get('event_type') == t %}selected{% endif %}>
-              {{ t }}
-            </option>
-            {% endfor %}
-          </select>
-          <input type="date" name="date" value="{{ request.args.get('date','') }}" style="min-width: 90px; padding: 3px 6px; font-size: 10px;">
-          <button class="btn btn-primary" style="padding: 3px 8px; font-size: 10px;"><i class="bi bi-funnel"></i></button>
-          <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost" style="padding: 3px 8px; font-size: 10px;"><i class="bi bi-arrow-counterclockwise"></i></a>
-        </form>
-        <button class="btn btn-ghost" style="padding: 3px 8px; font-size: 10px;" onclick="window.location.reload()">
-          <i class="bi bi-arrow-clockwise"></i>
-        </button>
-      </div>
-    </div>
-    <div class="log-table-scroll">
-      <table class="admin-compact-table" id="eventsTable" style="width: 100%; table-layout: fixed;">
-        <thead>
-          <tr>
-            <th style="width: 5%;">ID</th>
-            <th style="width: 6%;">CID</th>
-            <th style="width: 6%;">SID</th>
-            <th style="width: 20%;">Event</th>
-            <th style="width: 18%;">Time</th>
-            <th style="width: 20%;">Remarks</th>
-            <th style="width: 10%;">Evidence</th>
-            <th style="width: 15%;">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for e in events %}
-          <tr data-row-id="{{ e['event_id'] }}">
-            <td style="font-size: 11px; text-align: center;"><strong>{{ e['event_id'] }}</strong></td>
-            <td style="font-size: 11px; text-align: center;">{{ e['candidate_id'] }}</td>
-            <td style="font-size: 11px; text-align: center;">{{ e['session_id'] }}</td>
-            <td>
-              <span class="tag {{ 'bad' if 'Not Detected' in e['event_type'] else ('warn' if 'Tab' in e['event_type'] else ('ok' if 'Started' in e['event_type'] or 'Detected' == e['event_type'][-8:] else 'neutral')) }}" style="font-size: 8px; padding: 1px 6px; white-space: nowrap;">
-                {{ e['event_type'] }}
-              </span>
-            </td>
-            <td style="white-space: nowrap; font-size: 9px;">
-              {{ datetime.fromisoformat(e['timestamp']).strftime("%d %b %H:%M:%S") }}
-            </td>
-            <td style="font-size: 10px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ e['remarks'] }}">
-              {{ e['remarks'] }}
-            </td>
-            <td style="text-align:center;">
-              {% if e['screenshot_path'] %}
-                {% set screenshot_path = e['screenshot_path'] %}
-                {# Remove any 'photos/' prefix if it exists #}
-                {% if screenshot_path.startswith('photos/') %}
-                  {% set screenshot_path = screenshot_path.replace('photos/', '') %}
-                {% endif %}
-                <button class="evidence-btn" onclick="showEvidence('{{ screenshot_path }}', {{ e['event_id'] }}, '{{ datetime.fromisoformat(e['timestamp']).strftime('%d %b %Y %I:%M:%S %p') }}')" title="View Evidence" style="padding: 2px 5px; font-size: 9px;">
-                  <i class="bi bi-image-fill"></i>
-                </button>
-              {% else %}
-                <button class="evidence-btn" disabled title="No Evidence" style="padding: 2px 5px; font-size: 9px; opacity: 0.3;">
-                  <i class="bi bi-image-slash"></i>
-                </button>
-              {% endif %}
-            </td>
-            <td>
-              <div class="row-actions" style="gap: 2px;">
-                <button class="icon-btn" data-edit="event" data-id="{{ e['event_id'] }}"
-                  data-eventtype="{{ e['event_type'] }}" data-remarks="{{ e['remarks'] }}" style="padding: 2px 5px; font-size: 9px;">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button class="icon-btn danger" data-delete="event" data-id="{{ e['event_id'] }}" style="padding: 2px 5px; font-size: 9px;">
-                  <i class="bi bi-trash"></i>
+        <!-- EVENT LOGS TAB -->
+        <!-- ============================================ -->
+        <div class="admin-panel-body" id="tab-events">
+          <div class="admin-table-wrap">
+            <div class="table-toolbar">
+              <span class="count"><i class="bi bi-list-check"></i> {{ events|length }} Event(s)</span>
+              <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap; align-items: center;">
+                <form method="GET" action="{{ url_for('admin_dashboard') }}" class="filter-form" style="gap: var(--spacing-sm); flex-wrap: wrap;">
+                  <input type="text" name="candidate_id" placeholder="CID" value="{{ request.args.get('candidate_id', '') }}" style="min-width: 50px; padding: 3px 6px; font-size: 10px; width: 60px;">
+                  <select name="event_type" style="min-width: 90px; padding: 3px 6px; font-size: 10px;">
+                    <option value="">All Events</option>
+                    {% for t in event_types %}
+                    <option value="{{ t }}" {% if request.args.get('event_type') == t %}selected{% endif %}>
+                      {{ t }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                  <input type="date" name="date" value="{{ request.args.get('date','') }}" style="min-width: 90px; padding: 3px 6px; font-size: 10px;">
+                  <button class="btn btn-primary" style="padding: 3px 8px; font-size: 10px;"><i class="bi bi-funnel"></i></button>
+                  <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost" style="padding: 3px 8px; font-size: 10px;"><i class="bi bi-arrow-counterclockwise"></i></a>
+                </form>
+                <button class="btn btn-ghost" style="padding: 3px 8px; font-size: 10px;" onclick="window.location.reload()">
+                  <i class="bi bi-arrow-clockwise"></i>
                 </button>
               </div>
-            </td>
-          </tr>
-          {% else %}
-          <tr class="empty-row">
-            <td colspan="8">No events logged yet.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-    <!-- Evidence Modal -->
-    <div id="evidenceModal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3><i class="bi bi-image-fill"></i> Evidence Screenshot</h3>
-          <button class="close-btn" onclick="closeEvidence()">
-            <i class="bi bi-x-lg"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p><i class="bi bi-clock-history"></i> <span id="evidenceInfo">Captured during suspicious activity</span></p>
-          <div style="text-align: center; background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-md); min-height: 200px; display: flex; align-items: center; justify-content: center;">
-            <img id="evidenceImage" style="max-width: 100%; max-height: 500px; border-radius: var(--radius); display: none;">
-            <div id="evidenceLoading" style="color: var(--text-muted);">
-              <i class="bi bi-hourglass-split" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>
-              Loading evidence...
+            </div>
+            <div class="log-table-scroll">
+              <table class="admin-compact-table" id="eventsTable" style="width: 100%; table-layout: fixed;">
+                <thead>
+                  <tr>
+                    <th style="width: 5%;">ID</th>
+                    <th style="width: 6%;">CID</th>
+                    <th style="width: 6%;">SID</th>
+                    <th style="width: 20%;">Event</th>
+                    <th style="width: 18%;">Time</th>
+                    <th style="width: 20%;">Remarks</th>
+                    <th style="width: 10%;">Evidence</th>
+                    <th style="width: 15%;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for e in events %}
+                  <tr data-row-id="{{ e['event_id'] }}">
+                    <td style="font-size: 11px; text-align: center;"><strong>{{ e['event_id'] }}</strong></td>
+                    <td style="font-size: 11px; text-align: center;">{{ e['candidate_id'] }}</td>
+                    <td style="font-size: 11px; text-align: center;">{{ e['session_id'] }}</td>
+                    <td>
+                      <span class="tag {{ 'bad' if 'Not Detected' in e['event_type'] else ('warn' if 'Tab' in e['event_type'] else ('ok' if 'Started' in e['event_type'] or 'Detected' == e['event_type'][-8:] else 'neutral')) }}" style="font-size: 8px; padding: 1px 6px; white-space: nowrap;">
+                        {{ e['event_type'] }}
+                      </span>
+                    </td>
+                    <td style="white-space: nowrap; font-size: 9px;">
+                      {{ datetime.fromisoformat(e['timestamp']).strftime("%d %b %H:%M:%S") }}
+                    </td>
+                    <td style="font-size: 10px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ e['remarks'] }}">
+                      {{ e['remarks'] }}
+                    </td>
+                    <td style="text-align:center;">
+                      {% if e['screenshot_path'] %}
+                        {% set screenshot_path = e['screenshot_path'] %}
+                        {# Remove any 'photos/' prefix if it exists #}
+                        {% if screenshot_path.startswith('photos/') %}
+                          {% set screenshot_path = screenshot_path.replace('photos/', '') %}
+                        {% endif %}
+                        <button class="evidence-btn" onclick="showEvidence('{{ screenshot_path }}', {{ e['event_id'] }}, '{{ datetime.fromisoformat(e['timestamp']).strftime('%d %b %Y %I:%M:%S %p') }}')" title="View Evidence" style="padding: 2px 5px; font-size: 9px;">
+                          <i class="bi bi-image-fill"></i>
+                        </button>
+                      {% else %}
+                        <button class="evidence-btn" disabled title="No Evidence" style="padding: 2px 5px; font-size: 9px; opacity: 0.3;">
+                          <i class="bi bi-image-slash"></i>
+                        </button>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="row-actions" style="gap: 2px;">
+                        <button class="icon-btn" data-edit="event" data-id="{{ e['event_id'] }}"
+                          data-eventtype="{{ e['event_type'] }}" data-remarks="{{ e['remarks'] }}" style="padding: 2px 5px; font-size: 9px;">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="icon-btn danger" data-delete="event" data-id="{{ e['event_id'] }}" style="padding: 2px 5px; font-size: 9px;">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {% else %}
+                  <tr class="empty-row">
+                    <td colspan="8">No events logged yet.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Edit Modal -->
-    <div class="modal-overlay" id="modalOverlay">
-      <div class="panel modal-box card">
-        <p class="eyebrow" id="modalEyebrow">Edit Record</p>
-        <h1 class="title" style="font-size:19px;" id="modalTitle">Edit</h1>
-        <div id="modalErrors"></div>
-        <form id="modalForm">
-          <div id="modalFields"></div>
-          <div class="btn-row" style="margin-top:6px;">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <button type="button" class="btn btn-ghost" id="modalCancel">Cancel</button>
+        <!-- Evidence Modal -->
+        <div id="evidenceModal" class="modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3><i class="bi bi-image-fill"></i> Evidence Screenshot</h3>
+              <button class="close-btn" onclick="closeEvidence()">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p><i class="bi bi-clock-history"></i> <span id="evidenceInfo">Captured during suspicious activity</span></p>
+              <div style="text-align: center; background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-md); min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                <img id="evidenceImage" style="max-width: 100%; max-height: 500px; border-radius: var(--radius); display: none;">
+                <div id="evidenceLoading" style="color: var(--text-muted);">
+                  <i class="bi bi-hourglass-split" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>
+                  Loading evidence...
+                </div>
+              </div>
+            </div>
           </div>
-        </form>
+        </div>
+
+        <!-- Edit Modal -->
+        <div class="modal-overlay" id="modalOverlay">
+          <div class="panel modal-box card">
+            <p class="eyebrow" id="modalEyebrow">Edit Record</p>
+            <h1 class="title" style="font-size:19px;" id="modalTitle">Edit</h1>
+            <div id="modalErrors"></div>
+            <form id="modalForm">
+              <div id="modalFields"></div>
+              <div class="btn-row" style="margin-top:6px;">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-ghost" id="modalCancel">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <footer class="legal">&copy; 2026 VigilProctor · Powered by Session-Audited SQLite & Haar-Cascade Detection Engine</footer>
       </div>
     </div>
 
-    <footer class="legal">&copy; 2026 VigilProctor · Powered by Session-Audited SQLite & Haar-Cascade Detection Engine</footer>
-  </div>
-
-  <script>
-  // Tab switching
-  function switchTab(tabName) {
-    document.querySelectorAll('.admin-panel-body').forEach(tab => {
-      tab.classList.remove('active');
-    });
-    const selectedTab = document.getElementById('tab-' + tabName);
-    if (selectedTab) selectedTab.classList.add('active');
-    
-    document.querySelectorAll('.admin-tab').forEach(btn => {
-      btn.classList.remove('active');
-      if (btn.dataset.tab === tabName) btn.classList.add('active');
-    });
-  }
-
-  // Photo View - Fixed
-function viewPhoto(photoPath, candidateName) {
-    // photoPath is just the filename (e.g., "C101.jpg")
-    // Remove any 'photos/' prefix if it exists
-    var cleanPath = photoPath;
-    if (cleanPath.startsWith('photos/')) {
-        cleanPath = cleanPath.replace('photos/', '');
+    <script>
+    // Tab switching
+    function switchTab(tabName) {
+      document.querySelectorAll('.admin-panel-body').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      const selectedTab = document.getElementById('tab-' + tabName);
+      if (selectedTab) selectedTab.classList.add('active');
+      
+      document.querySelectorAll('.admin-tab').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === tabName) btn.classList.add('active');
+      });
     }
-    // Open with /photos/ prefix
-    window.open('/photos/' + cleanPath, '_blank');
-}
 
-// Evidence functions - Fixed
-function showEvidence(screenshotPath, eventId, timestamp) {
-    const img = document.getElementById("evidenceImage");
-    const info = document.getElementById("evidenceInfo");
-    const loading = document.getElementById("evidenceLoading");
-    
-    // Remove any 'photos/' prefix if it exists
-    var cleanPath = screenshotPath;
-    if (cleanPath.startsWith('photos/')) {
-        cleanPath = cleanPath.replace('photos/', '');
-    }
-    var fullPath = '/photos/' + cleanPath;
-    
-    console.log('Loading evidence from:', fullPath);
-    
-    img.style.display = 'none';
-    loading.style.display = 'block';
-    loading.innerHTML = '<i class="bi bi-hourglass-split" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>Loading evidence...';
-    
-    img.src = fullPath;
-    
-    img.onload = function() {
-        loading.style.display = 'none';
-        img.style.display = 'block';
-        info.textContent = '📸 Captured: ' + (timestamp || 'Unknown time');
-        document.getElementById("evidenceModal").classList.add("show");
-    };
-    
-    img.onerror = function() {
-        loading.innerHTML = '<i class="bi bi-exclamation-triangle" style="font-size: 40px; display: block; margin-bottom: 10px; color: var(--danger);"></i>Failed to load evidence';
-        info.textContent = '⚠️ Image not found: ' + cleanPath;
-        document.getElementById("evidenceModal").classList.add("show");
-    };
-}
-
-
-// Evidence functions - Fixed
-function showEvidence(screenshotPath, eventId, timestamp) {
-    const img = document.getElementById("evidenceImage");
-    const info = document.getElementById("evidenceInfo");
-    const loading = document.getElementById("evidenceLoading");
-    
-    // screenshotPath is already the relative path (e.g., "Candidate_C103/browser_focus_lost_17082026_151956.jpg")
-    var fullPath = '/photos/' + screenshotPath;
-    
-    console.log('Loading evidence from:', fullPath);
-    
-    img.style.display = 'none';
-    loading.style.display = 'block';
-    loading.innerHTML = '<i class="bi bi-hourglass-split" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>Loading evidence...';
-    
-    img.src = fullPath;
-    
-    img.onload = function() {
-        loading.style.display = 'none';
-        img.style.display = 'block';
-        info.textContent = '📸 Captured: ' + (timestamp || 'Unknown time');
-        document.getElementById("evidenceModal").classList.add("show");
-    };
-    
-    img.onerror = function() {
-        loading.innerHTML = '<i class="bi bi-exclamation-triangle" style="font-size: 40px; display: block; margin-bottom: 10px; color: var(--danger);"></i>Failed to load evidence';
-        info.textContent = '⚠️ Image not found: ' + screenshotPath;
-        document.getElementById("evidenceModal").classList.add("show");
-    };
-}
-
-  function closeEvidence() {
-    document.getElementById("evidenceModal").classList.remove("show");
-  }
-  
-  window.onclick = function(event) {
-    if (event.target.id === "evidenceModal") closeEvidence();
-  }
-  
-  document.addEventListener("keydown", function(event) {
-    if (event.key === "Escape") closeEvidence();
-  });
-  
-  // RISK PIE CHART
-  document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('riskPieChart');
-    if (!ctx) {
-      console.error('Risk pie chart canvas not found');
-      return;
-    }
-    
-    const riskData = {{ analytics.risk_distribution|tojson }};
-    const studentsByRisk = {{ analytics.students_by_risk|tojson }};
-    
-    // Colors for each risk level
-    const colors = {
-      'Low': 'rgba(52, 211, 153, 0.8)',
-      'Medium': 'rgba(251, 191, 36, 0.8)',
-      'High': 'rgba(248, 113, 113, 0.8)',
-      'Critical': 'rgba(220, 38, 38, 0.8)'
-    };
-    
-    const borderColors = {
-      'Low': 'rgba(52, 211, 153, 1)',
-      'Medium': 'rgba(251, 191, 36, 1)',
-      'High': 'rgba(248, 113, 113, 1)',
-      'Critical': 'rgba(220, 38, 38, 1)'
-    };
-    
-    // Prepare data for chart
-    const labels = Object.keys(riskData);
-    const values = labels.map(key => riskData[key]);
-    const backgroundColors = labels.map(key => colors[key]);
-    const borderColorsList = labels.map(key => borderColors[key]);
-    
-    // Create pie chart
-    const chart = new Chart(ctx, {
-      type: 'pie',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: values,
-          backgroundColor: backgroundColors,
-          borderColor: borderColorsList,
-          borderWidth: 2,
-          hoverOffset: 10
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              color: '#e5e7eb',
-              padding: 10,
-              font: {
-                size: 12
-              },
-              generateLabels: function(chart) {
-                const data = chart.data;
-                return data.labels.map(function(label, i) {
-                  const value = data.datasets[0].data[i];
-                  return {
-                    text: label + ' (' + value + ')',
-                    fillStyle: data.datasets[0].backgroundColor[i],
-                    strokeStyle: data.datasets[0].borderColor[i],
-                    index: i
-                  };
-                });
-              }
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.parsed || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                return label + ': ' + value + ' (' + percentage + '%)';
-              }
-            }
-          }
-        },
-        onClick: function(event, elements) {
-          if (elements.length > 0) {
-            const index = elements[0].index;
-            const riskCategory = this.data.labels[index];
-            showStudentsByRisk(riskCategory);
-          }
-        }
+    // Photo View
+    function viewPhoto(photoPath, candidateName) {
+      var cleanPath = photoPath;
+      if (cleanPath.startsWith('photos/')) {
+          cleanPath = cleanPath.replace('photos/', '');
       }
+      window.open('/photos/' + cleanPath, '_blank');
+    }
+
+    // Evidence functions
+    function showEvidence(screenshotPath, eventId, timestamp) {
+      const img = document.getElementById("evidenceImage");
+      const info = document.getElementById("evidenceInfo");
+      const loading = document.getElementById("evidenceLoading");
+      
+      var cleanPath = screenshotPath;
+      if (cleanPath.startsWith('photos/')) {
+          cleanPath = cleanPath.replace('photos/', '');
+      }
+      var fullPath = '/photos/' + cleanPath;
+      
+      img.style.display = 'none';
+      loading.style.display = 'block';
+      loading.innerHTML = '<i class="bi bi-hourglass-split" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>Loading evidence...';
+      
+      img.src = fullPath;
+      
+      img.onload = function() {
+          loading.style.display = 'none';
+          img.style.display = 'block';
+          info.textContent = '📸 Captured: ' + (timestamp || 'Unknown time');
+          document.getElementById("evidenceModal").classList.add("show");
+      };
+      
+      img.onerror = function() {
+          loading.innerHTML = '<i class="bi bi-exclamation-triangle" style="font-size: 40px; display: block; margin-bottom: 10px; color: var(--danger);"></i>Failed to load evidence';
+          info.textContent = '⚠️ Image not found: ' + cleanPath;
+          document.getElementById("evidenceModal").classList.add("show");
+      };
+    }
+
+    function closeEvidence() {
+      document.getElementById("evidenceModal").classList.remove("show");
+    }
+    
+    window.onclick = function(event) {
+      if (event.target.id === "evidenceModal") closeEvidence();
+    }
+    
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") closeEvidence();
     });
     
-    // Function to show students by risk category
-    window.showStudentsByRisk = function(riskCategory) {
-      const listContainer = document.getElementById('riskStudentList');
-      if (!listContainer) return;
-      
-      const students = {{ analytics.students_by_risk|tojson }};
-      const studentsList = students[riskCategory] || [];
-      
-      if (studentsList.length === 0) {
-        listContainer.innerHTML = `
-          <div style="text-align: center; color: var(--text-muted); padding: 20px 0;">
-            <i class="bi bi-people" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
-            <p>No students in <strong>${riskCategory}</strong> risk category</p>
-          </div>
-        `;
+    // RISK PIE CHART
+    document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('riskPieChart');
+      if (!ctx) {
+        console.error('Risk pie chart canvas not found');
         return;
       }
       
-      // Get color for this risk category
+      const riskData = {{ analytics.risk_distribution|tojson }};
+      const studentsByRisk = {{ analytics.students_by_risk|tojson }};
+      
+      // Colors for each risk level
       const colors = {
-        'Low': 'var(--success)',
-        'Medium': 'var(--warning)',
-        'High': 'var(--danger)',
-        'Critical': '#dc2626'
+        'Low': 'rgba(52, 211, 153, 0.8)',
+        'Medium': 'rgba(251, 191, 36, 0.8)',
+        'High': 'rgba(248, 113, 113, 0.8)',
+        'Critical': 'rgba(220, 38, 38, 0.8)'
       };
       
-      const riskColor = colors[riskCategory] || 'var(--text)';
+      const borderColors = {
+        'Low': 'rgba(52, 211, 153, 1)',
+        'Medium': 'rgba(251, 191, 36, 1)',
+        'High': 'rgba(248, 113, 113, 1)',
+        'Critical': 'rgba(220, 38, 38, 1)'
+      };
       
-      let html = `
-        <div style="margin-bottom: 12px;">
-          <h4 style="color: ${riskColor}; margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: ${riskColor};"></span>
-            ${riskCategory} Risk Students (${studentsList.length})
-          </h4>
-        </div>
-        <div style="max-height: 300px; overflow-y: auto;">
-          <table class="admin-compact-table" style="width: 100%;">
-            <thead>
-              <tr>
-                <th style="width: 25%;">ID</th>
-                <th style="width: 35%;">Name</th>
-                <th style="width: 25%;">Score</th>
-                <th style="width: 15%;">Risk</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
+      // Prepare data for chart
+      const labels = Object.keys(riskData);
+      const values = labels.map(key => riskData[key]);
+      const backgroundColors = labels.map(key => colors[key]);
+      const borderColorsList = labels.map(key => borderColors[key]);
       
-      studentsList.forEach(student => {
-        const scoreColor = student.integrity_score >= 90 ? 'var(--success)' :
-                          student.integrity_score >= 75 ? 'var(--warning)' :
-                          student.integrity_score >= 50 ? 'var(--danger)' : '#dc2626';
-        
-        html += `
-          <tr>
-            <td style="font-size: 12px; font-weight: 600;">${student.candidate_id}</td>
-            <td style="font-size: 12px;">${student.name}</td>
-            <td style="font-size: 12px; font-weight: 600; color: ${scoreColor};">${student.integrity_score}/100</td>
-            <td>
-              <span class="badge ${riskCategory === 'Low' ? 'badge-completed' : riskCategory === 'Medium' ? 'badge-paused' : 'badge-running'}" style="font-size: 8px; padding: 1px 8px;">
-                ${riskCategory}
-              </span>
-            </td>
-          </tr>
-        `;
+      // Create pie chart
+      const chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            backgroundColor: backgroundColors,
+            borderColor: borderColorsList,
+            borderWidth: 2,
+            hoverOffset: 10
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: '#e5e7eb',
+                padding: 10,
+                font: {
+                  size: 12
+                },
+                generateLabels: function(chart) {
+                  const data = chart.data;
+                  return data.labels.map(function(label, i) {
+                    const value = data.datasets[0].data[i];
+                    return {
+                      text: label + ' (' + value + ')',
+                      fillStyle: data.datasets[0].backgroundColor[i],
+                      strokeStyle: data.datasets[0].borderColor[i],
+                      index: i
+                    };
+                  });
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                  return label + ': ' + value + ' (' + percentage + '%)';
+                }
+              }
+            }
+          },
+          onClick: function(event, elements) {
+            if (elements.length > 0) {
+              const index = elements[0].index;
+              const riskCategory = this.data.labels[index];
+              showStudentsByRisk(riskCategory);
+            }
+          }
+        }
       });
       
-      html += `
-            </tbody>
-          </table>
-        </div>
-      `;
+      // Function to show students by risk category
+      window.showStudentsByRisk = function(riskCategory) {
+        const listContainer = document.getElementById('riskStudentList');
+        if (!listContainer) return;
+        
+        const students = {{ analytics.students_by_risk|tojson }};
+        const studentsList = students[riskCategory] || [];
+        
+        if (studentsList.length === 0) {
+          listContainer.innerHTML = `
+            <div style="text-align: center; color: var(--text-muted); padding: 20px 0;">
+              <i class="bi bi-people" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
+              <p>No students in <strong>${riskCategory}</strong> risk category</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Get color for this risk category
+        const colors = {
+          'Low': 'var(--success)',
+          'Medium': 'var(--warning)',
+          'High': 'var(--danger)',
+          'Critical': '#dc2626'
+        };
+        
+        const riskColor = colors[riskCategory] || 'var(--text)';
+        
+        let html = `
+          <div style="margin-bottom: 12px;">
+            <h4 style="color: ${riskColor}; margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+              <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: ${riskColor};"></span>
+              ${riskCategory} Risk Students (${studentsList.length})
+            </h4>
+          </div>
+          <div style="max-height: 300px; overflow-y: auto;">
+            <table class="admin-compact-table" style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">ID</th>
+                  <th style="width: 35%;">Name</th>
+                  <th style="width: 25%;">Score</th>
+                  <th style="width: 15%;">Risk</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        
+        studentsList.forEach(student => {
+          const scoreColor = student.integrity_score >= 90 ? 'var(--success)' :
+                            student.integrity_score >= 75 ? 'var(--warning)' :
+                            student.integrity_score >= 50 ? 'var(--danger)' : '#dc2626';
+          
+          html += `
+            <tr>
+              <td style="font-size: 12px; font-weight: 600;">${student.candidate_id}</td>
+              <td style="font-size: 12px;">${student.name}</td>
+              <td style="font-size: 12px; font-weight: 600; color: ${scoreColor};">${student.integrity_score}/100</td>
+              <td>
+                <span class="badge ${riskCategory === 'Low' ? 'badge-completed' : riskCategory === 'Medium' ? 'badge-paused' : 'badge-running'}" style="font-size: 8px; padding: 1px 8px;">
+                  ${riskCategory}
+                </span>
+              </td>
+            </tr>
+          `;
+        });
+        
+        html += `
+              </tbody>
+            </table>
+          </div>
+        `;
+        
+        listContainer.innerHTML = html;
+      };
       
-      listContainer.innerHTML = html;
-    };
-    
-    // Auto-select Low risk on load if there are students
-    const lowRiskStudents = {{ analytics.students_by_risk.Low|tojson }};
-    if (lowRiskStudents && lowRiskStudents.length > 0) {
-      setTimeout(function() {
-        showStudentsByRisk('Low');
-      }, 500);
-    }
-  });
-</script>
+      // Auto-select Low risk on load if there are students
+      const lowRiskStudents = {{ analytics.students_by_risk.Low|tojson }};
+      if (lowRiskStudents && lowRiskStudents.length > 0) {
+        setTimeout(function() {
+          showStudentsByRisk('Low');
+        }, 500);
+      }
+    });
+  </script>
 
   <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 </body>
