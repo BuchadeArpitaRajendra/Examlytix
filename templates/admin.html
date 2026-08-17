@@ -8,6 +8,61 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    .performance-comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .performance-stat-card {
+      background: var(--bg-alt);
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .performance-stat-card .stat-number {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 4px 0;
+    }
+    .subject-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      margin: 2px;
+    }
+    .time-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .time-badge.morning {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fcd34d;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+    .time-badge.afternoon {
+      background: rgba(79, 140, 255, 0.2);
+      color: #93c5fd;
+      border: 1px solid rgba(79, 140, 255, 0.3);
+    }
+    .time-badge.evening {
+      background: rgba(248, 113, 113, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+    .time-badge.night {
+      background: rgba(139, 92, 246, 0.2);
+      color: #a78bfa;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+  </style>
 </head>
 
 <body>
@@ -26,7 +81,7 @@
         <h1 class="title">Admin Dashboard</h1>
         <p class="subtitle">Monitor Candidates, Exams, Events, and System Integrity. View Analytics and Manage All Exam Data.</p>
 
-        <!-- Tab Navigation - Added Advanced Analytics -->
+        <!-- Tab Navigation -->
         <div class="admin-tabs">
           <button class="admin-tab active" data-tab="analytics" onclick="switchTab('analytics')">
             <i class="bi bi-graph-up"></i> Analytics
@@ -139,9 +194,9 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- ADVANCED ANALYTICS TAB - NEW -->
+        <!-- ADVANCED ANALYTICS TAB -->
         <!-- ============================================ -->
-        <div class="admin-panel-body" id="tab-advanced">
+         <div class="admin-panel-body" id="tab-advanced">
           <!-- Time Period Filter -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
             <div>
@@ -149,69 +204,135 @@
               <h2 style="margin: 0; font-size: 20px;">Deep Insights & Trends</h2>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="btn btn-ghost" style="padding: 6px 16px; font-size: 12px;" onclick="setTimeRange('week')">Week</button>
-              <button class="btn btn-ghost" style="padding: 6px 16px; font-size: 12px;" onclick="setTimeRange('month')">Month</button>
-              <button class="btn btn-ghost" style="padding: 6px 16px; font-size: 12px;" onclick="setTimeRange('all')">All Time</button>
+              <button class="btn btn-ghost" style="padding: 6px 16px; font-size: 12px;" onclick="setTimeRange('week', event)">Week</button>
+              <button class="btn btn-ghost" style="padding: 6px 16px; font-size: 12px;" onclick="setTimeRange('month', event)">Month</button>
+              <button class="btn btn-ghost" style="padding: 6px 16px; font-size: 12px;" onclick="setTimeRange('all', event)">All Time</button>
             </div>
           </div>
 
-          <!-- Chart 1: Integrity Score Trends Over Time (Line Chart) -->
-          <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border); margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-              <div>
-                <p class="eyebrow" style="margin-bottom: 0;"><i class="bi bi-line-chart"></i> Integrity Score Trends</p>
-                <h4 style="margin: 0; font-size: 14px; color: var(--text-light);">Average integrity scores over time</h4>
-              </div>
-              <span class="badge badge-completed" style="font-size: 10px;">Trend Analysis</span>
-            </div>
-            <canvas id="integrityTrendChart" style="max-height: 300px; max-width: 100%;"></canvas>
-          </div>
-
-          <!-- Chart 2: Event Frequency Analysis (Bar Chart) -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+          <!-- Row 1: Integrity Trends + Pie Chart -->
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <!-- Integrity Score Trends -->
             <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <div>
-                  <p class="eyebrow" style="margin-bottom: 0;"><i class="bi bi-bar-chart"></i> Event Distribution</p>
-                  <h4 style="margin: 0; font-size: 14px; color: var(--text-light);">Types of events logged</h4>
+                  <p class="eyebrow" style="margin-bottom: 0;"><i class="bi bi-line-chart"></i> Integrity Score Trends</p>
+                  <h4 style="margin: 0; font-size: 14px; color: var(--text-light);">Average integrity scores over time</h4>
                 </div>
+                <span class="badge badge-completed" style="font-size: 10px;">Trend Analysis</span>
               </div>
-              <canvas id="eventDistributionChart" style="max-height: 250px; max-width: 100%;"></canvas>
+              <canvas id="integrityTrendChart" style="max-height: 250px; max-width: 100%;"></canvas>
             </div>
 
-            <!-- Chart 3: Daily/Weekly/Monthly Statistics -->
+            <!-- Pie Chart -->
             <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <div>
-                  <p class="eyebrow" style="margin-bottom: 0;"><i class="bi bi-calendar3"></i> Activity Timeline</p>
-                  <h4 style="margin: 0; font-size: 14px; color: var(--text-light);">Exams per day</h4>
+                  <p class="eyebrow" style="margin-bottom: 0;"><i class="bi bi-pie-chart-fill"></i> Risk Distribution</p>
+                  <h4 style="margin: 0; font-size: 14px; color: var(--text-light);">Integrity risk levels</h4>
                 </div>
               </div>
-              <canvas id="activityTimelineChart" style="max-height: 250px; max-width: 100%;"></canvas>
+              <canvas id="riskPieChart" style="max-height: 220px; max-width: 100%;"></canvas>
+              <!-- Risk Legend -->
+              <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 12px;">
+                <span style="font-size: 11px; display: flex; align-items: center; gap: 4px;"><span class="legend-dot" style="background: var(--success); width: 12px; height: 12px;"></span> Low</span>
+                <span style="font-size: 11px; display: flex; align-items: center; gap: 4px;"><span class="legend-dot" style="background: var(--warning); width: 12px; height: 12px;"></span> Medium</span>
+                <span style="font-size: 11px; display: flex; align-items: center; gap: 4px;"><span class="legend-dot" style="background: var(--danger); width: 12px; height: 12px;"></span> High</span>
+                <span style="font-size: 11px; display: flex; align-items: center; gap: 4px;"><span class="legend-dot" style="background: #dc2626; width: 12px; height: 12px;"></span> Critical</span>
+              </div>
             </div>
           </div>
 
-          <!-- Chart 4: Candidate Performance Comparison (Horizontal Bar) -->
+          <!-- Row 2: Candidate Performance + Subject-wise Analysis -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <!-- Candidate Performance Comparison -->
             <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <div>
                   <p class="eyebrow" style="margin-bottom: 0;"><i class="bi bi-people-fill"></i> Candidate Performance</p>
-                  <h4 style="margin: 0; font-size: 14px; color: var(--text-light);">Average integrity scores by candidate</h4>
+                  <h4 style="margin: 0; font-size: 14px; color: var(--text-light);">Compare integrity scores across candidates</h4>
                 </div>
               </div>
               <canvas id="candidatePerformanceChart" style="max-height: 300px; max-width: 100%;"></canvas>
             </div>
 
-            <!-- Chart 5: Peak Exam Hours Analysis -->
+            <!-- Subject-wise Performance -->
             <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <div>
-                  <p class="eyebrow" style="margin-bottom: 0;"><i class="bi bi-clock"></i> Peak Exam Hours</p>
-                  <h4 style="margin: 0; font-size: 14px; color: var(--text-light);">When do candidates take exams?</h4>
+                  <p class="eyebrow" style="margin-bottom: 0;"><i class="bi bi-book-fill"></i> Subject-wise Analysis</p>
+                  <h4 style="margin: 0; font-size: 14px; color: var(--text-light);">Performance by exam subject</h4>
                 </div>
               </div>
-              <canvas id="peakHoursChart" style="max-height: 300px; max-width: 100%;"></canvas>
+              <canvas id="subjectPerformanceChart" style="max-height: 300px; max-width: 100%;"></canvas>
+            </div>
+          </div>
+
+          <!-- Row 3: Time-based Analysis + Historical Tracking -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <!-- Time-based Analysis (Morning vs Evening) -->
+            <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div>
+                  <p class="eyebrow" style="margin-bottom: 0;"><i class="bi bi-clock"></i> Time-based Analysis</p>
+                  <h4 style="margin: 0; font-size: 14px; color: var(--text-light);">Morning vs Evening performance</h4>
+                </div>
+              </div>
+              <div id="timeAnalysisContainer">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                  <div style="background: var(--bg); padding: 12px; border-radius: var(--radius); text-align: center;">
+                    <div style="font-size: 11px; color: var(--text-muted);">Morning (6AM - 12PM)</div>
+                    <div style="font-size: 24px; font-weight: 700; color: var(--warning);" id="morningScore">--</div>
+                    <div style="font-size: 12px; color: var(--text-light);" id="morningCount">-- exams</div>
+                  </div>
+                  <div style="background: var(--bg); padding: 12px; border-radius: var(--radius); text-align: center;">
+                    <div style="font-size: 11px; color: var(--text-muted);">Afternoon (12PM - 5PM)</div>
+                    <div style="font-size: 24px; font-weight: 700; color: var(--primary);" id="afternoonScore">--</div>
+                    <div style="font-size: 12px; color: var(--text-light);" id="afternoonCount">-- exams</div>
+                  </div>
+                  <div style="background: var(--bg); padding: 12px; border-radius: var(--radius); text-align: center;">
+                    <div style="font-size: 11px; color: var(--text-muted);">Evening (5PM - 9PM)</div>
+                    <div style="font-size: 24px; font-weight: 700; color: var(--danger);" id="eveningScore">--</div>
+                    <div style="font-size: 12px; color: var(--text-light);" id="eveningCount">-- exams</div>
+                  </div>
+                  <div style="background: var(--bg); padding: 12px; border-radius: var(--radius); text-align: center;">
+                    <div style="font-size: 11px; color: var(--text-muted);">Night (9PM - 6AM)</div>
+                    <div style="font-size: 24px; font-weight: 700; color: var(--accent);" id="nightScore">--</div>
+                    <div style="font-size: 12px; color: var(--text-light);" id="nightCount">-- exams</div>
+                  </div>
+                </div>
+                <canvas id="timeAnalysisChart" style="max-height: 150px; max-width: 100%;"></canvas>
+              </div>
+            </div>
+
+            <!-- Historical Performance Tracking -->
+            <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div>
+                  <p class="eyebrow" style="margin-bottom: 0;"><i class="bi bi-clock-history"></i> Historical Performance</p>
+                  <h4 style="margin: 0; font-size: 14px; color: var(--text-light);">Performance trends over time</h4>
+                </div>
+              </div>
+              <div id="historicalContainer">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                  <div style="background: var(--bg); padding: 12px; border-radius: var(--radius); text-align: center;">
+                    <div style="font-size: 11px; color: var(--text-muted);">Last 7 Days</div>
+                    <div style="font-size: 24px; font-weight: 700; color: var(--success);" id="weekScore">--</div>
+                    <div style="font-size: 12px; color: var(--text-light);" id="weekCount">-- exams</div>
+                  </div>
+                  <div style="background: var(--bg); padding: 12px; border-radius: var(--radius); text-align: center;">
+                    <div style="font-size: 11px; color: var(--text-muted);">Last 30 Days</div>
+                    <div style="font-size: 24px; font-weight: 700; color: var(--warning);" id="monthScore">--</div>
+                    <div style="font-size: 12px; color: var(--text-light);" id="monthCount">-- exams</div>
+                  </div>
+                  <div style="background: var(--bg); padding: 12px; border-radius: var(--radius); text-align: center;">
+                    <div style="font-size: 11px; color: var(--text-muted);">All Time</div>
+                    <div style="font-size: 24px; font-weight: 700; color: var(--primary);" id="allTimeScore">--</div>
+                    <div style="font-size: 12px; color: var(--text-light);" id="allTimeCount">-- exams</div>
+                  </div>
+                </div>
+                <canvas id="historicalChart" style="max-height: 150px; max-width: 100%;"></canvas>
+              </div>
             </div>
           </div>
 
@@ -503,491 +624,754 @@
     </div>
 
     <script>
-    // =============================================
-    // TAB SWITCHING
-    // =============================================
-    function switchTab(tabName) {
-      document.querySelectorAll('.admin-panel-body').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      const selectedTab = document.getElementById('tab-' + tabName);
-      if (selectedTab) selectedTab.classList.add('active');
-      
-      document.querySelectorAll('.admin-tab').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.tab === tabName) btn.classList.add('active');
-      });
+// =============================================
+// TAB SWITCHING
+// =============================================
+function switchTab(tabName) {
+  document.querySelectorAll('.admin-panel-body').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  const selectedTab = document.getElementById('tab-' + tabName);
+  if (selectedTab) selectedTab.classList.add('active');
+  
+  document.querySelectorAll('.admin-tab').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.tab === tabName) btn.classList.add('active');
+  });
 
-      // Initialize charts when switching to advanced tab
-      if (tabName === 'advanced') {
-        setTimeout(initAdvancedCharts, 300);
+  if (tabName === 'advanced') {
+    setTimeout(initAdvancedCharts, 300);
+  }
+}
+
+// =============================================
+// PHOTO VIEW
+// =============================================
+function viewPhoto(photoPath, candidateName) {
+  var cleanPath = photoPath;
+  if (cleanPath.startsWith('photos/')) {
+      cleanPath = cleanPath.replace('photos/', '');
+  }
+  window.open('/photos/' + cleanPath, '_blank');
+}
+
+// =============================================
+// EVIDENCE FUNCTIONS
+// =============================================
+function showEvidence(screenshotPath, eventId, timestamp) {
+  const img = document.getElementById("evidenceImage");
+  const info = document.getElementById("evidenceInfo");
+  const loading = document.getElementById("evidenceLoading");
+  
+  var cleanPath = screenshotPath;
+  if (cleanPath.startsWith('photos/')) {
+      cleanPath = cleanPath.replace('photos/', '');
+  }
+  var fullPath = '/photos/' + cleanPath;
+  
+  img.style.display = 'none';
+  loading.style.display = 'block';
+  loading.innerHTML = '<i class="bi bi-hourglass-split" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>Loading evidence...';
+  
+  img.src = fullPath;
+  
+  img.onload = function() {
+      loading.style.display = 'none';
+      img.style.display = 'block';
+      info.textContent = '📸 Captured: ' + (timestamp || 'Unknown time');
+      document.getElementById("evidenceModal").classList.add("show");
+  };
+  
+  img.onerror = function() {
+      loading.innerHTML = '<i class="bi bi-exclamation-triangle" style="font-size: 40px; display: block; margin-bottom: 10px; color: var(--danger);"></i>Failed to load evidence';
+      info.textContent = '⚠️ Image not found: ' + cleanPath;
+      document.getElementById("evidenceModal").classList.add("show");
+  };
+}
+
+function closeEvidence() {
+  document.getElementById("evidenceModal").classList.remove("show");
+}
+
+window.onclick = function(event) {
+  if (event.target.id === "evidenceModal") closeEvidence();
+}
+
+document.addEventListener("keydown", function(event) {
+  if (event.key === "Escape") closeEvidence();
+});
+
+// =============================================
+// ADVANCED ANALYTICS CHARTS
+// =============================================
+let advancedCharts = {};
+
+function initAdvancedCharts() {
+  // Destroy existing charts
+  Object.values(advancedCharts).forEach(chart => {
+    if (chart) chart.destroy();
+  });
+  advancedCharts = {};
+
+  // Get data from server
+  const sessionsData = {{ sessions|tojson }};
+  const eventsData = {{ events|tojson }};
+  const candidatesData = {{ candidates|tojson }};
+  const riskData = {{ analytics.risk_distribution|tojson }};
+
+  console.log('Sessions data:', sessionsData);
+  console.log('Events data:', eventsData);
+  console.log('Risk data:', riskData);
+
+  // =============================================
+  // 1. RISK PIE CHART
+  // =============================================
+  const pieCtx = document.getElementById('riskPieChart');
+  if (pieCtx) {
+    const colors = {
+      'Low': 'rgba(52, 211, 153, 0.8)',
+      'Medium': 'rgba(251, 191, 36, 0.8)',
+      'High': 'rgba(248, 113, 113, 0.8)',
+      'Critical': 'rgba(220, 38, 38, 0.8)'
+    };
+    const borderColors = {
+      'Low': 'rgba(52, 211, 153, 1)',
+      'Medium': 'rgba(251, 191, 36, 1)',
+      'High': 'rgba(248, 113, 113, 1)',
+      'Critical': 'rgba(220, 38, 38, 1)'
+    };
+    
+    const labels = Object.keys(riskData);
+    const values = labels.map(key => riskData[key] || 0);
+    
+    // Only show categories with values > 0
+    const filteredLabels = [];
+    const filteredValues = [];
+    const filteredColors = [];
+    const filteredBorderColors = [];
+    
+    labels.forEach((label, index) => {
+      if (values[index] > 0) {
+        filteredLabels.push(label);
+        filteredValues.push(values[index]);
+        filteredColors.push(colors[label]);
+        filteredBorderColors.push(borderColors[label]);
       }
-    }
-
-    // =============================================
-    // PHOTO VIEW
-    // =============================================
-    function viewPhoto(photoPath, candidateName) {
-      var cleanPath = photoPath;
-      if (cleanPath.startsWith('photos/')) {
-          cleanPath = cleanPath.replace('photos/', '');
-      }
-      window.open('/photos/' + cleanPath, '_blank');
-    }
-
-    // =============================================
-    // EVIDENCE FUNCTIONS
-    // =============================================
-    function showEvidence(screenshotPath, eventId, timestamp) {
-      const img = document.getElementById("evidenceImage");
-      const info = document.getElementById("evidenceInfo");
-      const loading = document.getElementById("evidenceLoading");
-      
-      var cleanPath = screenshotPath;
-      if (cleanPath.startsWith('photos/')) {
-          cleanPath = cleanPath.replace('photos/', '');
-      }
-      var fullPath = '/photos/' + cleanPath;
-      
-      img.style.display = 'none';
-      loading.style.display = 'block';
-      loading.innerHTML = '<i class="bi bi-hourglass-split" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>Loading evidence...';
-      
-      img.src = fullPath;
-      
-      img.onload = function() {
-          loading.style.display = 'none';
-          img.style.display = 'block';
-          info.textContent = '📸 Captured: ' + (timestamp || 'Unknown time');
-          document.getElementById("evidenceModal").classList.add("show");
-      };
-      
-      img.onerror = function() {
-          loading.innerHTML = '<i class="bi bi-exclamation-triangle" style="font-size: 40px; display: block; margin-bottom: 10px; color: var(--danger);"></i>Failed to load evidence';
-          info.textContent = '⚠️ Image not found: ' + cleanPath;
-          document.getElementById("evidenceModal").classList.add("show");
-      };
-    }
-
-    function closeEvidence() {
-      document.getElementById("evidenceModal").classList.remove("show");
+    });
+    
+    // If no data, show placeholder
+    if (filteredValues.length === 0) {
+      filteredLabels.push('No Data');
+      filteredValues.push(1);
+      filteredColors.push('rgba(156, 163, 175, 0.3)');
+      filteredBorderColors.push('rgba(156, 163, 175, 0.5)');
     }
     
-    window.onclick = function(event) {
-      if (event.target.id === "evidenceModal") closeEvidence();
+    advancedCharts.riskPie = new Chart(pieCtx, {
+      type: 'doughnut',
+      data: {
+        labels: filteredLabels,
+        datasets: [{
+          data: filteredValues,
+          backgroundColor: filteredColors,
+          borderColor: filteredBorderColors,
+          borderWidth: 2,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#e5e7eb',
+              padding: 8,
+              font: { size: 10 },
+              boxWidth: 12,
+              boxHeight: 12
+            }
+          }
+        },
+        cutout: '60%'
+      }
+    });
+  }
+
+  // =============================================
+  // 2. INTEGRITY TREND
+  // =============================================
+  const trendCtx = document.getElementById('integrityTrendChart');
+  if (trendCtx) {
+    const dateGroups = {};
+    sessionsData.forEach(s => {
+      if (s.start_time && s.integrity_score !== null) {
+        const date = new Date(s.start_time).toLocaleDateString();
+        if (!dateGroups[date]) dateGroups[date] = { total: 0, count: 0, scores: [] };
+        dateGroups[date].total += s.integrity_score;
+        dateGroups[date].count += 1;
+        dateGroups[date].scores.push(s.integrity_score);
+      }
+    });
+    
+    const dates = Object.keys(dateGroups).sort();
+    const avgScores = dates.map(d => Math.round(dateGroups[d].total / dateGroups[d].count));
+    const examCounts = dates.map(d => dateGroups[d].count);
+    
+    // If no data, show placeholder
+    if (dates.length === 0) {
+      dates.push('No Data');
+      avgScores.push(0);
+      examCounts.push(0);
     }
     
-    document.addEventListener("keydown", function(event) {
-      if (event.key === "Escape") closeEvidence();
+    advancedCharts.integrityTrend = new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: dates,
+        datasets: [
+          {
+            label: 'Avg Integrity Score',
+            data: avgScores,
+            borderColor: '#4f8cff',
+            backgroundColor: 'rgba(79, 140, 255, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#4f8cff',
+            pointRadius: 4
+          },
+          {
+            label: 'Exams',
+            data: examCounts,
+            borderColor: '#fbbf24',
+            backgroundColor: 'rgba(251, 191, 36, 0.1)',
+            fill: true,
+            tension: 0.4,
+            borderDash: [5, 5],
+            pointBackgroundColor: '#fbbf24',
+            pointRadius: 3,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { labels: { color: '#e5e7eb', font: { size: 10 } } }
+        },
+        scales: {
+          x: { 
+            ticks: { color: '#9ca3af', font: { size: 9 } }, 
+            grid: { color: 'rgba(255,255,255,0.05)' } 
+          },
+          y: { 
+            min: 0, 
+            max: 100, 
+            ticks: { color: '#9ca3af', font: { size: 9 } }, 
+            grid: { color: 'rgba(255,255,255,0.05)' } 
+          },
+          y1: { 
+            position: 'right', 
+            ticks: { color: '#9ca3af', font: { size: 9 } }, 
+            grid: { display: false },
+            beginAtZero: true
+          }
+        }
+      }
     });
+  }
 
-    // =============================================
-    // ADVANCED ANALYTICS CHARTS
-    // =============================================
-    let advancedCharts = {};
+  // =============================================
+  // 3. EVENT HEATMAP - FIXED
+  // =============================================
+  generateHeatmap(eventsData);
 
-    function initAdvancedCharts() {
-      // Destroy existing charts if any
-      Object.values(advancedCharts).forEach(chart => {
-        if (chart) chart.destroy();
-      });
-      advancedCharts = {};
+  // =============================================
+  // 4. CANDIDATE PERFORMANCE
+  // =============================================
+  const perfCtx = document.getElementById('candidatePerformanceChart');
+  if (perfCtx) {
+    const candidateScores = {};
+    candidatesData.forEach(c => {
+      const candidateSessions = sessionsData.filter(s => s.candidate_id === c.candidate_id);
+      if (candidateSessions.length > 0) {
+        // Get latest session score
+        const latest = candidateSessions.sort((a, b) => new Date(b.start_time) - new Date(a.start_time))[0];
+        if (latest && latest.integrity_score !== null) {
+          candidateScores[c.candidate_id] = {
+            name: c.name || c.candidate_id,
+            score: latest.integrity_score
+          };
+        }
+      }
+    });
+    
+    const sorted = Object.values(candidateScores).sort((a, b) => b.score - a.score).slice(0, 10);
+    
+    // If no data, show placeholder
+    if (sorted.length === 0) {
+      sorted.push({ name: 'No Data', score: 0 });
+    }
+    
+    advancedCharts.candidatePerformance = new Chart(perfCtx, {
+      type: 'bar',
+      data: {
+        labels: sorted.map(c => c.name),
+        datasets: [{
+          data: sorted.map(c => c.score),
+          backgroundColor: sorted.map(c => 
+            c.score >= 90 ? 'rgba(52, 211, 153, 0.8)' :
+            c.score >= 75 ? 'rgba(251, 191, 36, 0.8)' :
+            c.score > 0 ? 'rgba(248, 113, 113, 0.8)' :
+            'rgba(156, 163, 175, 0.3)'
+          ),
+          borderColor: sorted.map(c => 
+            c.score >= 90 ? 'rgba(52, 211, 153, 1)' :
+            c.score >= 75 ? 'rgba(251, 191, 36, 1)' :
+            c.score > 0 ? 'rgba(248, 113, 113, 1)' :
+            'rgba(156, 163, 175, 0.5)'
+          ),
+          borderWidth: 1
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { 
+            min: 0, 
+            max: 100, 
+            ticks: { color: '#9ca3af', font: { size: 9 } }, 
+            grid: { color: 'rgba(255,255,255,0.05)' } 
+          },
+          y: { 
+            ticks: { color: '#9ca3af', font: { size: 9 } }, 
+            grid: { color: 'rgba(255,255,255,0.05)' } 
+          }
+        }
+      }
+    });
+  }
 
-      // Get data from server
-      const sessionsData = {{ sessions|tojson }};
-      const eventsData = {{ events|tojson }};
-      const candidatesData = {{ candidates|tojson }};
+  // =============================================
+  // 5. SUBJECT-WISE PERFORMANCE
+  // =============================================
+  const subjectCtx = document.getElementById('subjectPerformanceChart');
+  if (subjectCtx) {
+    const subjectData = {};
+    sessionsData.forEach(s => {
+      if (s.candidate_id && s.integrity_score !== null) {
+        const candidate = candidatesData.find(c => c.candidate_id === s.candidate_id);
+        const subject = candidate ? candidate.exam_subject || 'Unknown' : 'Unknown';
+        if (!subjectData[subject]) subjectData[subject] = { total: 0, count: 0 };
+        subjectData[subject].total += s.integrity_score;
+        subjectData[subject].count += 1;
+      }
+    });
+    
+    const subjects = Object.keys(subjectData);
+    const avgScores = subjects.map(s => subjectData[s].count > 0 ? Math.round(subjectData[s].total / subjectData[s].count) : 0);
+    
+    // If no data, show placeholder
+    if (subjects.length === 0) {
+      subjects.push('No Data');
+      avgScores.push(0);
+    }
+    
+    advancedCharts.subjectPerformance = new Chart(subjectCtx, {
+      type: 'bar',
+      data: {
+        labels: subjects,
+        datasets: [{
+          data: avgScores,
+          backgroundColor: 'rgba(79, 140, 255, 0.6)',
+          borderColor: 'rgba(79, 140, 255, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { 
+            ticks: { color: '#9ca3af', font: { size: 9 } }, 
+            grid: { color: 'rgba(255,255,255,0.05)' } 
+          },
+          y: { 
+            min: 0, 
+            max: 100, 
+            ticks: { color: '#9ca3af', font: { size: 9 } }, 
+            grid: { color: 'rgba(255,255,255,0.05)' } 
+          }
+        }
+      }
+    });
+  }
+
+  // =============================================
+  // 6. TIME ANALYSIS
+  // =============================================
+  analyzeTimePerformance(sessionsData);
+
+  // =============================================
+  // 7. HISTORICAL PERFORMANCE
+  // =============================================
+  analyzeHistoricalPerformance(sessionsData);
+
+  // =============================================
+  // 8. SUMMARY STATS
+  // =============================================
+  updateSummaryStats(sessionsData);
+}
+
+// =============================================
+// HEATMAP GENERATION - FIXED
+// =============================================
+function generateHeatmap(eventsData) {
+  const container = document.getElementById('heatmapGrid');
+  if (!container) {
+    console.warn('Heatmap container not found');
+    return;
+  }
+  
+  console.log('Generating heatmap with events:', eventsData.length);
+  
+  // Group events by day of week and hour
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const hours = Array.from({length: 24}, (_, i) => i);
+  
+  // Initialize heatmap data
+  const heatmap = {};
+  days.forEach(day => {
+    heatmap[day] = {};
+    hours.forEach(hour => {
+      heatmap[day][hour] = 0;
+    });
+  });
+  
+  // Count events - ONLY count actual event types (not placeholder data)
+  let totalEvents = 0;
+  eventsData.forEach(e => {
+    if (e.timestamp) {
+      try {
+        const date = new Date(e.timestamp);
+        if (!isNaN(date.getTime())) {
+          const day = days[date.getDay()];
+          const hour = date.getHours();
+          if (heatmap[day] && heatmap[day][hour] !== undefined) {
+            heatmap[day][hour] += 1;
+            totalEvents += 1;
+          }
+        }
+      } catch (err) {
+        console.warn('Invalid timestamp:', e.timestamp);
+      }
+    }
+  });
+  
+  console.log('Total events counted for heatmap:', totalEvents);
+  
+  // If no events, show a message
+  if (totalEvents === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px 0; color: var(--text-muted);">
+        <i class="bi bi-inbox" style="font-size: 40px; display: block; margin-bottom: 12px;"></i>
+        <p>No event data available for heatmap</p>
+        <p style="font-size: 12px;">Events will appear here once candidates start taking exams</p>
+      </div>
+    `;
+    return;
+  }
+  
+  // Find max for scaling
+  let maxCount = 0;
+  days.forEach(day => {
+    hours.forEach(hour => {
+      if (heatmap[day][hour] > maxCount) maxCount = heatmap[day][hour];
+    });
+  });
+  maxCount = maxCount || 1;
+  
+  // Build HTML
+  let html = '';
+  
+  // Header row (hours)
+  html += '<div class="heatmap-cell empty" style="background: transparent !important; color: var(--text-muted); font-size: 8px; min-height: 20px;">H</div>';
+  hours.forEach(hour => {
+    html += `<div class="heatmap-cell empty" style="background: transparent !important; color: var(--text-muted); font-size: 8px; min-height: 20px;">${hour.toString().padStart(2, '0')}</div>`;
+  });
+  
+  // Data rows
+  days.forEach(day => {
+    html += `<div class="heatmap-cell empty" style="background: transparent !important; color: var(--text-muted); font-size: 8px; min-height: 20px;">${day}</div>`;
+    hours.forEach(hour => {
+      const count = heatmap[day][hour] || 0;
+      const intensity = maxCount > 0 ? count / maxCount : 0;
+      let bgColor;
+      let textColor = '#fff';
       
-      // 1. Integrity Score Trends (Line Chart)
-      const integrityTrendCtx = document.getElementById('integrityTrendChart');
-      if (integrityTrendCtx) {
-        // Group sessions by date and calculate average score
-        const dateGroups = {};
-        sessionsData.forEach(s => {
-          if (s.start_time && s.integrity_score !== null) {
-            const date = new Date(s.start_time).toLocaleDateString();
-            if (!dateGroups[date]) dateGroups[date] = { total: 0, count: 0 };
-            dateGroups[date].total += s.integrity_score;
-            dateGroups[date].count += 1;
-          }
-        });
-        
-        const dates = Object.keys(dateGroups).sort();
-        const avgScores = dates.map(d => Math.round(dateGroups[d].total / dateGroups[d].count));
-        const examCounts = dates.map(d => dateGroups[d].count);
-        
-        advancedCharts.integrityTrend = new Chart(integrityTrendCtx, {
-          type: 'line',
-          data: {
-            labels: dates.slice(-14), // Last 14 days
-            datasets: [
-              {
-                label: 'Avg Integrity Score',
-                data: avgScores.slice(-14),
-                borderColor: '#4f8cff',
-                backgroundColor: 'rgba(79, 140, 255, 0.1)',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#4f8cff',
-                pointRadius: 4
-              },
-              {
-                label: 'Exams Conducted',
-                data: examCounts.slice(-14),
-                borderColor: '#fbbf24',
-                backgroundColor: 'rgba(251, 191, 36, 0.1)',
-                fill: true,
-                tension: 0.4,
-                borderDash: [5, 5],
-                pointBackgroundColor: '#fbbf24',
-                pointRadius: 3,
-                yAxisID: 'y1'
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: {
-                labels: { color: '#e5e7eb', font: { size: 11 } }
-              }
-            },
-            scales: {
-              x: {
-                ticks: { color: '#9ca3af', font: { size: 10 } },
-                grid: { color: 'rgba(255,255,255,0.05)' }
-              },
-              y: {
-                min: 0,
-                max: 100,
-                ticks: { color: '#9ca3af', font: { size: 10 } },
-                grid: { color: 'rgba(255,255,255,0.05)' }
-              },
-              y1: {
-                position: 'right',
-                ticks: { color: '#9ca3af', font: { size: 10 } },
-                grid: { display: false }
-              }
-            }
-          }
-        });
+      if (count === 0) {
+        bgColor = 'var(--bg)';
+        textColor = 'var(--text-muted)';
+      } else if (intensity < 0.25) {
+        bgColor = 'rgba(79, 140, 255, 0.25)';
+      } else if (intensity < 0.5) {
+        bgColor = 'rgba(79, 140, 255, 0.50)';
+      } else if (intensity < 0.75) {
+        bgColor = 'rgba(79, 140, 255, 0.75)';
+      } else {
+        bgColor = 'rgba(248, 113, 113, 0.90)';
       }
-
-      // 2. Event Distribution (Bar Chart)
-      const eventDistCtx = document.getElementById('eventDistributionChart');
-      if (eventDistCtx) {
-        const eventCounts = {};
-        eventsData.forEach(e => {
-          const type = e.event_type || 'Unknown';
-          eventCounts[type] = (eventCounts[type] || 0) + 1;
-        });
-        
-        const labels = Object.keys(eventCounts);
-        const values = Object.values(eventCounts);
-        const colors = labels.map(label => {
-          if (label.includes('Not Detected')) return 'rgba(248, 113, 113, 0.8)';
-          if (label.includes('Detected')) return 'rgba(52, 211, 153, 0.8)';
-          if (label.includes('Tab') || label.includes('Focus')) return 'rgba(251, 191, 36, 0.8)';
-          return 'rgba(96, 165, 250, 0.8)';
-        });
-        
-        advancedCharts.eventDistribution = new Chart(eventDistCtx, {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              data: values,
-              backgroundColor: colors,
-              borderColor: colors.map(c => c.replace('0.8', '1')),
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: { display: false }
-            },
-            scales: {
-              x: {
-                ticks: { color: '#9ca3af', font: { size: 9 }, maxRotation: 45 },
-                grid: { color: 'rgba(255,255,255,0.05)' }
-              },
-              y: {
-                ticks: { color: '#9ca3af', font: { size: 10 } },
-                grid: { color: 'rgba(255,255,255,0.05)' },
-                beginAtZero: true
-              }
-            }
-          }
-        });
-      }
-
-      // 3. Activity Timeline (Daily)
-      const activityCtx = document.getElementById('activityTimelineChart');
-      if (activityCtx) {
-        const dailyCounts = {};
-        sessionsData.forEach(s => {
-          if (s.start_time) {
-            const date = new Date(s.start_time).toLocaleDateString();
-            dailyCounts[date] = (dailyCounts[date] || 0) + 1;
-          }
-        });
-        
-        const dates = Object.keys(dailyCounts).sort().slice(-14);
-        const counts = dates.map(d => dailyCounts[d]);
-        
-        advancedCharts.activityTimeline = new Chart(activityCtx, {
-          type: 'bar',
-          data: {
-            labels: dates,
-            datasets: [{
-              label: 'Exams',
-              data: counts,
-              backgroundColor: 'rgba(79, 140, 255, 0.6)',
-              borderColor: 'rgba(79, 140, 255, 1)',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: { display: false }
-            },
-            scales: {
-              x: {
-                ticks: { color: '#9ca3af', font: { size: 9 } },
-                grid: { color: 'rgba(255,255,255,0.05)' }
-              },
-              y: {
-                ticks: { color: '#9ca3af', font: { size: 10 } },
-                grid: { color: 'rgba(255,255,255,0.05)' },
-                beginAtZero: true
-              }
-            }
-          }
-        });
-      }
-
-      // 4. Candidate Performance (Horizontal Bar)
-      const candidateCtx = document.getElementById('candidatePerformanceChart');
-      if (candidateCtx) {
-        // Get latest session score for each candidate
-        const candidateScores = {};
-        candidatesData.forEach(c => {
-          const latest = sessionsData.filter(s => s.candidate_id === c.candidate_id)
-            .sort((a, b) => new Date(b.start_time) - new Date(a.start_time))[0];
-          if (latest && latest.integrity_score !== null) {
-            candidateScores[c.candidate_id] = {
-              name: c.name || c.candidate_id,
-              score: latest.integrity_score
-            };
-          }
-        });
-        
-        const sorted = Object.values(candidateScores)
-          .sort((a, b) => b.score - a.score)
-          .slice(0, 10);
-        
-        advancedCharts.candidatePerformance = new Chart(candidateCtx, {
-          type: 'bar',
-          data: {
-            labels: sorted.map(c => c.name),
-            datasets: [{
-              data: sorted.map(c => c.score),
-              backgroundColor: sorted.map(c => 
-                c.score >= 90 ? 'rgba(52, 211, 153, 0.8)' :
-                c.score >= 75 ? 'rgba(251, 191, 36, 0.8)' :
-                'rgba(248, 113, 113, 0.8)'
-              ),
-              borderColor: sorted.map(c => 
-                c.score >= 90 ? 'rgba(52, 211, 153, 1)' :
-                c.score >= 75 ? 'rgba(251, 191, 36, 1)' :
-                'rgba(248, 113, 113, 1)'
-              ),
-              borderWidth: 1
-            }]
-          },
-          options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: { display: false }
-            },
-            scales: {
-              x: {
-                min: 0,
-                max: 100,
-                ticks: { color: '#9ca3af', font: { size: 10 } },
-                grid: { color: 'rgba(255,255,255,0.05)' }
-              },
-              y: {
-                ticks: { color: '#9ca3af', font: { size: 10 } },
-                grid: { color: 'rgba(255,255,255,0.05)' }
-              }
-            }
-          }
-        });
-      }
-
-      // 5. Peak Hours Analysis
-      const peakCtx = document.getElementById('peakHoursChart');
-      if (peakCtx) {
-        const hourCounts = Array(24).fill(0);
-        sessionsData.forEach(s => {
-          if (s.start_time) {
-            const hour = new Date(s.start_time).getHours();
-            hourCounts[hour] += 1;
-          }
-        });
-        
-        const hours = Array.from({length: 24}, (_, i) => 
-          i.toString().padStart(2, '0') + ':00'
-        );
-        
-        // Find peak hour
-        let maxCount = 0;
-        let peakHourIndex = 0;
-        hourCounts.forEach((count, i) => {
-          if (count > maxCount) {
-            maxCount = count;
-            peakHourIndex = i;
-          }
-        });
-        
-        // Update summary stats
-        document.getElementById('peakHour').textContent = peakHourIndex.toString().padStart(2, '0') + ':00';
-        
-        advancedCharts.peakHours = new Chart(peakCtx, {
-          type: 'bar',
-          data: {
-            labels: hours,
-            datasets: [{
-              data: hourCounts,
-              backgroundColor: hourCounts.map((count, i) => 
-                i === peakHourIndex ? 'rgba(248, 113, 113, 0.9)' : 'rgba(79, 140, 255, 0.5)'
-              ),
-              borderColor: hourCounts.map((count, i) => 
-                i === peakHourIndex ? 'rgba(248, 113, 113, 1)' : 'rgba(79, 140, 255, 1)'
-              ),
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: { display: false }
-            },
-            scales: {
-              x: {
-                ticks: { color: '#9ca3af', font: { size: 8 }, maxTicksLimit: 12 },
-                grid: { color: 'rgba(255,255,255,0.05)' }
-              },
-              y: {
-                ticks: { color: '#9ca3af', font: { size: 10 } },
-                grid: { color: 'rgba(255,255,255,0.05)' },
-                beginAtZero: true
-              }
-            }
-          }
-        });
-      }
-
-      // Update Summary Stats
-      updateSummaryStats(sessionsData);
-    }
-
-    // =============================================
-    // UPDATE SUMMARY STATS
-    // =============================================
-    function updateSummaryStats(sessions) {
-      // Average Duration
-      let totalDuration = 0;
-      let durationCount = 0;
-      sessions.forEach(s => {
-        if (s.start_time && s.end_time) {
-          const start = new Date(s.start_time);
-          const end = new Date(s.end_time);
-          const duration = (end - start) / 1000 / 60; // in minutes
-          if (duration > 0) {
-            totalDuration += duration;
-            durationCount += 1;
-          }
-        }
-      });
-      const avgDuration = durationCount > 0 ? Math.round(totalDuration / durationCount) : 0;
-      document.getElementById('avgDuration').textContent = avgDuration + 'm';
-
-      // Most Active Day
-      const dayCounts = {};
-      sessions.forEach(s => {
-        if (s.start_time) {
-          const day = new Date(s.start_time).toLocaleDateString('en', { weekday: 'long' });
-          dayCounts[day] = (dayCounts[day] || 0) + 1;
-        }
-      });
-      let maxDay = '--';
-      let maxDayCount = 0;
-      Object.entries(dayCounts).forEach(([day, count]) => {
-        if (count > maxDayCount) {
-          maxDayCount = count;
-          maxDay = day;
-        }
-      });
-      document.getElementById('mostActiveDay').textContent = maxDay;
-
-      // Pass Rate (scores >= 75)
-      let passCount = 0;
-      let totalScores = 0;
-      sessions.forEach(s => {
-        if (s.integrity_score !== null) {
-          totalScores += 1;
-          if (s.integrity_score >= 75) passCount += 1;
-        }
-      });
-      const passRate = totalScores > 0 ? Math.round((passCount / totalScores) * 100) : 0;
-      document.getElementById('passRate').textContent = passRate + '%';
-    }
-
-    // =============================================
-    // TIME RANGE FILTER (Placeholder)
-    // =============================================
-    function setTimeRange(range) {
-      // This would filter the charts based on time range
-      // For now, just highlight the selected button
-      document.querySelectorAll('#tab-advanced .btn-ghost').forEach(btn => {
-        btn.style.borderColor = 'var(--border)';
-        btn.style.color = 'var(--text-light)';
-      });
-      event.target.style.borderColor = 'var(--primary)';
-      event.target.style.color = 'var(--primary)';
-    }
-
-    // =============================================
-    // INITIALIZE ON LOAD
-    // =============================================
-    document.addEventListener('DOMContentLoaded', function() {
-      // Wait a moment for everything to render
-      setTimeout(initAdvancedCharts, 500);
+      
+      html += `<div class="heatmap-cell" style="background: ${bgColor}; color: ${textColor}; min-height: 30px;" title="${day} ${hour}:00 - ${count} events">${count > 0 ? count : ''}</div>`;
     });
+  });
+  
+  container.innerHTML = html;
+}
 
-    // =============================================
-    // WINDOW RESIZE HANDLER
-    // =============================================
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        Object.values(advancedCharts).forEach(chart => {
-          if (chart) chart.resize();
-        });
-      }, 250);
+// =============================================
+// TIME ANALYSIS
+// =============================================
+function analyzeTimePerformance(sessionsData) {
+  const timeSlots = {
+    morning: { label: 'Morning', start: 6, end: 12, scores: [], count: 0 },
+    afternoon: { label: 'Afternoon', start: 12, end: 17, scores: [], count: 0 },
+    evening: { label: 'Evening', start: 17, end: 21, scores: [], count: 0 },
+    night: { label: 'Night', start: 21, end: 6, scores: [], count: 0 }
+  };
+  
+  sessionsData.forEach(s => {
+    if (s.start_time && s.integrity_score !== null) {
+      const hour = new Date(s.start_time).getHours();
+      let slot = null;
+      if (hour >= 6 && hour < 12) slot = 'morning';
+      else if (hour >= 12 && hour < 17) slot = 'afternoon';
+      else if (hour >= 17 && hour < 21) slot = 'evening';
+      else slot = 'night';
+      
+      timeSlots[slot].scores.push(s.integrity_score);
+      timeSlots[slot].count += 1;
+    }
+  });
+  
+  // Update UI
+  ['morning', 'afternoon', 'evening', 'night'].forEach(slot => {
+    const data = timeSlots[slot];
+    const avg = data.scores.length > 0 ? Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length) : 0;
+    const el = document.getElementById(slot + 'Score');
+    const countEl = document.getElementById(slot + 'Count');
+    if (el) el.textContent = data.count > 0 ? avg + '/100' : '--';
+    if (countEl) countEl.textContent = data.count > 0 ? data.count + ' exams' : 'No data';
+  });
+  
+  // Chart
+  const ctx = document.getElementById('timeAnalysisChart');
+  if (ctx) {
+    // Destroy existing chart if any
+    if (advancedCharts.timeAnalysis) {
+      advancedCharts.timeAnalysis.destroy();
+    }
+    
+    const slots = ['morning', 'afternoon', 'evening', 'night'];
+    const labels = ['Morning', 'Afternoon', 'Evening', 'Night'];
+    const avgs = slots.map(s => {
+      const data = timeSlots[s];
+      return data.scores.length > 0 ? Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length) : 0;
     });
-  </script>
+    
+    advancedCharts.timeAnalysis = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Avg Score',
+          data: avgs,
+          backgroundColor: ['rgba(251, 191, 36, 0.6)', 'rgba(79, 140, 255, 0.6)', 'rgba(248, 113, 113, 0.6)', 'rgba(139, 92, 246, 0.6)'],
+          borderColor: ['rgba(251, 191, 36, 1)', 'rgba(79, 140, 255, 1)', 'rgba(248, 113, 113, 1)', 'rgba(139, 92, 246, 1)'],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#9ca3af', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+          y: { min: 0, max: 100, ticks: { color: '#9ca3af', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+      }
+    });
+  }
+}
+
+// =============================================
+// HISTORICAL PERFORMANCE
+// =============================================
+function analyzeHistoricalPerformance(sessionsData) {
+  const now = new Date();
+  const weekAgo = new Date(now);
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const monthAgo = new Date(now);
+  monthAgo.setDate(monthAgo.getDate() - 30);
+  
+  let weekScores = [], monthScores = [], allScores = [];
+  
+  sessionsData.forEach(s => {
+    if (s.start_time && s.integrity_score !== null) {
+      const date = new Date(s.start_time);
+      allScores.push(s.integrity_score);
+      if (date >= weekAgo) weekScores.push(s.integrity_score);
+      if (date >= monthAgo) monthScores.push(s.integrity_score);
+    }
+  });
+  
+  const calcAvg = (arr) => arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
+  
+  document.getElementById('weekScore').textContent = weekScores.length > 0 ? calcAvg(weekScores) + '/100' : '--';
+  document.getElementById('weekCount').textContent = weekScores.length > 0 ? weekScores.length + ' exams' : 'No data';
+  document.getElementById('monthScore').textContent = monthScores.length > 0 ? calcAvg(monthScores) + '/100' : '--';
+  document.getElementById('monthCount').textContent = monthScores.length > 0 ? monthScores.length + ' exams' : 'No data';
+  document.getElementById('allTimeScore').textContent = allScores.length > 0 ? calcAvg(allScores) + '/100' : '--';
+  document.getElementById('allTimeCount').textContent = allScores.length > 0 ? allScores.length + ' exams' : 'No data';
+  
+  // Historical chart
+  const ctx = document.getElementById('historicalChart');
+  if (ctx) {
+    if (advancedCharts.historical) {
+      advancedCharts.historical.destroy();
+    }
+    
+    const periods = ['Week', 'Month', 'All Time'];
+    const avgs = [
+      weekScores.length > 0 ? calcAvg(weekScores) : 0,
+      monthScores.length > 0 ? calcAvg(monthScores) : 0,
+      allScores.length > 0 ? calcAvg(allScores) : 0
+    ];
+    
+    advancedCharts.historical = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: periods,
+        datasets: [{
+          data: avgs,
+          borderColor: '#4f8cff',
+          backgroundColor: 'rgba(79, 140, 255, 0.1)',
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#4f8cff',
+          pointRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#9ca3af', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+          y: { min: 0, max: 100, ticks: { color: '#9ca3af', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+        }
+      }
+    });
+  }
+}
+
+// =============================================
+// UPDATE SUMMARY STATS
+// =============================================
+function updateSummaryStats(sessions) {
+  let totalDuration = 0, durationCount = 0;
+  sessions.forEach(s => {
+    if (s.start_time && s.end_time) {
+      try {
+        const start = new Date(s.start_time);
+        const end = new Date(s.end_time);
+        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+          const duration = (end - start) / 1000 / 60;
+          if (duration > 0) { totalDuration += duration; durationCount += 1; }
+        }
+      } catch (e) {}
+    }
+  });
+  document.getElementById('avgDuration').textContent = durationCount > 0 ? Math.round(totalDuration / durationCount) + 'm' : '--';
+  
+  const dayCounts = {};
+  sessions.forEach(s => {
+    if (s.start_time) {
+      try {
+        const day = new Date(s.start_time).toLocaleDateString('en', { weekday: 'long' });
+        dayCounts[day] = (dayCounts[day] || 0) + 1;
+      } catch (e) {}
+    }
+  });
+  let maxDay = '--', maxDayCount = 0;
+  Object.entries(dayCounts).forEach(([day, count]) => {
+    if (count > maxDayCount) { maxDayCount = count; maxDay = day; }
+  });
+  document.getElementById('mostActiveDay').textContent = maxDay;
+  
+  const hourCounts = Array(24).fill(0);
+  sessions.forEach(s => {
+    if (s.start_time) {
+      try {
+        const hour = new Date(s.start_time).getHours();
+        hourCounts[hour] += 1;
+      } catch (e) {}
+    }
+  });
+  let peakHourIndex = 0, maxCount = 0;
+  hourCounts.forEach((count, i) => {
+    if (count > maxCount) { maxCount = count; peakHourIndex = i; }
+  });
+  document.getElementById('peakHour').textContent = maxCount > 0 ? peakHourIndex.toString().padStart(2, '0') + ':00' : '--';
+  
+  let passCount = 0, totalScores = 0;
+  sessions.forEach(s => {
+    if (s.integrity_score !== null) {
+      totalScores += 1;
+      if (s.integrity_score >= 75) passCount += 1;
+    }
+  });
+  document.getElementById('passRate').textContent = totalScores > 0 ? Math.round((passCount / totalScores) * 100) + '%' : '--';
+}
+
+// =============================================
+// TIME RANGE FILTER
+// =============================================
+function setTimeRange(range, event) {
+  document.querySelectorAll('#tab-advanced .btn-ghost').forEach(btn => {
+    btn.style.borderColor = 'var(--border)';
+    btn.style.color = 'var(--text-light)';
+  });
+  if (event && event.target) {
+    event.target.style.borderColor = 'var(--primary)';
+    event.target.style.color = 'var(--primary)';
+  }
+  console.log('Time range selected:', range);
+}
+
+// =============================================
+// INITIALIZE
+// =============================================
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(initAdvancedCharts, 500);
+});
+
+let resizeTimeout;
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    Object.values(advancedCharts).forEach(chart => {
+      if (chart) chart.resize();
+    });
+  }, 250);
+});
+</script>
 
   <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 </body>
