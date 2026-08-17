@@ -17,6 +17,7 @@ def decode_data_url_image(data_url):
 
 def save_photo(candidate_id, frame):
     filename = f"{candidate_id}.jpg"
-    path = os.path.join(PHOTO_FOLDER, filename)
-    cv2.imwrite(path, frame)
-    return os.path.join("photos", filename)
+    file_path = os.path.join(PHOTO_FOLDER, filename)
+    cv2.imwrite(file_path, frame)
+    # Return ONLY the filename (not with photos/ prefix)
+    return filename

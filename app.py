@@ -6,6 +6,12 @@ from config import SECRET_KEY, FLASK_HOST, FLASK_PORT, FLASK_DEBUG
 app = Flask("VigilProctor")
 app.secret_key = SECRET_KEY
 
+# Add route to serve photos
+@app.route('/photos/<path:filename>')
+def serve_photo(filename):
+    """Serve photos from the photos directory"""
+    return send_from_directory(PHOTO_FOLDER, filename)
+
 from routes.auth import *
 from routes.exam import *
 from routes.api import *

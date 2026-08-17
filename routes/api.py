@@ -145,6 +145,7 @@ def api_log_event():
             image_data,
             "browser_focus_lost"
         )
+        # The save_screenshot function now returns a relative path
     database.log_event(
         session["candidate_id"], session_id, event_type, remarks, screenshot_path
     )

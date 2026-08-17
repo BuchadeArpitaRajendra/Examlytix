@@ -117,65 +117,77 @@
           <span><span class="legend-dot danger"></span> Poor (<75)</span>
         </div>
 
-        <!-- Full Event Log -->
-        <div style="margin-top: 24px;">
-          <p class="eyebrow" style="margin-bottom: 12px;"><i class="bi bi-list-check"></i> Detailed Event Log</p>
-          <div class="admin-table-wrap">
-            <div class="log-table-scroll" style="max-height: none; border: none; padding: 0; margin: 0;">
-              <table class="log-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Timestamp</th>
-                    <th>Event Type</th>
-                    <th>Details</th>
-                    <th>Evidence</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% set ns = namespace(show=true, count=0) %}
-                  {% for e in events %}
-                    {% if ns.show %}
-                      {% set ns.count = ns.count + 1 %}
-                      <tr>
-                        <td>{{ ns.count }}</td>
-                        <td style="white-space: nowrap;">
-                          {{ datetime.fromisoformat(e['timestamp']).strftime("%d %b %H:%M:%S") }}
-                        </td>
-                        <td>
-                          {% if e['event_type'] == 'Exam Started' or e['event_type'] == 'Exam Ended' %}
-                            <span class="tag neutral">{{ e['event_type'] }}</span>
-                          {% elif e['event_type'] == 'Exam Paused' or e['event_type'] == 'Exam Resumed' %}
-                            <span class="tag warn">{{ e['event_type'] }}</span>
-                          {% elif 'Not Detected' in e['event_type'] or 'Switched' in e['event_type'] %}
-                            <span class="tag bad">{{ e['event_type'] }}</span>
-                          {% else %}
-                            <span class="tag ok">{{ e['event_type'] }}</span>
-                          {% endif %}
-                        </td>
-                        <td style="font-size: 12px;">{{ e['remarks'] or '—' }}</td>
-                        <td style="text-align: center;">
-                          {% if e['screenshot_path'] %}
-                            <button class="evidence-btn" onclick="showEvidence({{ e['event_id'] }}, '{{ datetime.fromisoformat(e['timestamp']).strftime('%d %b %H:%M:%S') }}')">
-                              <i class="bi bi-image"></i>
-                            </button>
-                          {% else %}
-                            <button class="evidence-btn" disabled title="No Screenshot">
-                              <i class="bi bi-image"></i>
-                            </button>
-                          {% endif %}
-                        </td>
-                      </tr>
-                      {% if e['event_type'] == 'Exam Ended' %}
-                        {% set ns.show = false %}
-                      {% endif %}
-                    {% endif %}
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <!-- Full Event Log - COMPACT VERSION -->
+<div style="margin-top: 24px;">
+  <p class="eyebrow" style="margin-bottom: 12px;">
+    <i class="bi bi-list-check"></i> Detailed Event Log
+    <span style="font-weight: normal; color: var(--text-muted); font-size: 11px; text-transform: none;">
+      ({{ events|length }} events)
+    </span>
+  </p>
+  <div class="admin-table-wrap">
+    <div class="log-table-scroll" style="max-height: 400px; overflow-y: auto;">
+      <table class="admin-compact-table" style="width: 100%; table-layout: fixed;">
+        <thead>
+          <tr>
+            <th style="width: 8%;">#</th>
+            <th style="width: 18%;">Time</th>
+            <th style="width: 22%;">Event</th>
+            <th style="width: 37%;">Details</th>
+            <th style="width: 15%;">Evidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set ns = namespace(show=true, count=0) %}
+          {% for e in events %}
+            {% if ns.show %}
+              {% set ns.count = ns.count + 1 %}
+              <tr>
+                <td style="text-align: center; font-weight: 600; color: var(--text-muted); font-size: 12px;">{{ ns.count }}</td>
+                <td style="white-space: nowrap; font-size: 11px; color: var(--text-light);">
+                  {{ datetime.fromisoformat(e['timestamp']).strftime("%H:%M:%S") }}
+                </td>
+                <td>
+                  {% if e['event_type'] == 'Exam Started' or e['event_type'] == 'Exam Ended' %}
+                    <span class="tag neutral" style="font-size: 9px; padding: 2px 8px;">{{ e['event_type'] }}</span>
+                  {% elif e['event_type'] == 'Exam Paused' or e['event_type'] == 'Exam Resumed' %}
+                    <span class="tag warn" style="font-size: 9px; padding: 2px 8px;">{{ e['event_type'] }}</span>
+                  {% elif 'Not Detected' in e['event_type'] or 'Switched' in e['event_type'] %}
+                    <span class="tag bad" style="font-size: 9px; padding: 2px 8px;">{{ e['event_type'] }}</span>
+                  {% else %}
+                    <span class="tag ok" style="font-size: 9px; padding: 2px 8px;">{{ e['event_type'] }}</span>
+                  {% endif %}
+                </td>
+                <td style="font-size: 11px; color: var(--text-light); word-wrap: break-word; overflow-wrap: break-word; max-width: 200px;">
+                  {{ e['remarks'] or '—' }}
+                </td>
+                <td style="text-align: center;">
+  {% if e['screenshot_path'] %}
+    {% set screenshot_path = e['screenshot_path'] %}
+    {# Remove any 'photos/' prefix if it exists #}
+    {% if screenshot_path.startswith('photos/') %}
+      {% set screenshot_path = screenshot_path.replace('photos/', '') %}
+    {% endif %}
+    <button class="evidence-btn" onclick="showEvidence('{{ screenshot_path }}', {{ e['event_id'] }}, '{{ datetime.fromisoformat(e['timestamp']).strftime('%d %b %H:%M:%S') }}')" style="padding: 2px 6px; font-size: 10px;">
+      <i class="bi bi-image-fill"></i> View
+    </button>
+  {% else %}
+    <button class="evidence-btn" disabled title="No Screenshot" style="padding: 2px 6px; font-size: 10px; opacity: 0.4;">
+      <i class="bi bi-image-slash"></i> None
+    </button>
+  {% endif %}
+</td>
+              </tr>
+              {% if e['event_type'] == 'Exam Ended' %}
+                {% set ns.show = false %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
         <!-- Action Buttons -->
         <div class="btn-row" style="margin-top: 24px;">
@@ -193,46 +205,107 @@
     </div>
 
     <!-- Evidence Modal -->
-    <div id="evidenceModal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3><i class="bi bi-image"></i> Evidence Screenshot</h3>
-          <button class="close-btn" onclick="closeEvidence()">
-            <i class="bi bi-x-lg"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p><i class="bi bi-clock-history"></i><span id="evidenceInfo">Captured during Event</span></p>
-          <img id="evidenceImage" style="max-width: 100%; border-radius: var(--radius-lg);">
+<div id="evidenceModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="bi bi-image-fill"></i> Evidence Screenshot</h3>
+      <button class="close-btn" onclick="closeEvidence()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p><i class="bi bi-clock-history"></i> <span id="evidenceInfo">Captured during suspicious activity</span></p>
+      <div style="text-align: center; background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-md); min-height: 200px; display: flex; align-items: center; justify-content: center;">
+        <img id="evidenceImage" style="max-width: 100%; max-height: 500px; border-radius: var(--radius); display: none;">
+        <div id="evidenceLoading" style="color: var(--text-muted);">
+          <i class="bi bi-hourglass-split" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>
+          Loading evidence...
         </div>
       </div>
     </div>
+  </div>
+</div>
 
     <footer class="legal">&copy; 2026 VigilProctor · Powered by Session-Audited SQLite & Haar-Cascade Detection Engine</footer>
   </div>
 
   <script>
-    function showEvidence(eventId, timestamp) {
-      document.getElementById("evidenceImage").src = "/evidence/" + eventId;
-      document.getElementById("evidenceInfo").textContent = 'Captured: ' + timestamp;
-      document.getElementById("evidenceModal").classList.add("show");
+  
+  // =============================================
+  // EVIDENCE FUNCTIONS
+  // =============================================
+  
+  function showEvidence(screenshotPath, eventId, timestamp) {
+    console.log('showEvidence called with:', screenshotPath, eventId, timestamp);
+    
+    const img = document.getElementById("evidenceImage");
+    const info = document.getElementById("evidenceInfo");
+    const loading = document.getElementById("evidenceLoading");
+    const modal = document.getElementById("evidenceModal");
+    
+    if (!img || !info || !loading || !modal) {
+      console.error('Modal elements not found!');
+      return;
     }
     
-    function closeEvidence() {
-      document.getElementById("evidenceModal").classList.remove("show");
+    // Remove any 'photos/' prefix if it exists
+    var cleanPath = screenshotPath;
+    if (cleanPath.startsWith('photos/')) {
+      cleanPath = cleanPath.replace('photos/', '');
     }
+    var fullPath = '/photos/' + cleanPath;
     
-    window.onclick = function(event) {
-      if (event.target.id === "evidenceModal") {
-        closeEvidence();
-      }
+    console.log('Loading evidence from:', fullPath);
+    
+    // Reset and show loading
+    img.style.display = 'none';
+    loading.style.display = 'block';
+    loading.innerHTML = '<i class="bi bi-hourglass-split" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>Loading evidence...';
+    
+    // Set image source
+    img.src = fullPath;
+    
+    // Handle successful load
+    img.onload = function() {
+      console.log('Image loaded successfully');
+      loading.style.display = 'none';
+      img.style.display = 'block';
+      info.textContent = '📸 Captured: ' + (timestamp || 'Unknown time');
+      modal.classList.add('show');
+    };
+    
+    // Handle error
+    img.onerror = function() {
+      console.error('Failed to load image:', fullPath);
+      loading.innerHTML = '<i class="bi bi-exclamation-triangle" style="font-size: 40px; display: block; margin-bottom: 10px; color: var(--danger);"></i>Failed to load evidence';
+      info.textContent = '⚠️ Image not found: ' + cleanPath;
+      modal.classList.add('show');
+    };
+  }
+  
+  function closeEvidence() {
+    const modal = document.getElementById("evidenceModal");
+    if (modal) {
+      modal.classList.remove("show");
     }
-    
-    document.addEventListener("keydown", function(event) {
-      if (event.key === "Escape") {
-        closeEvidence();
-      }
-    });
-  </script>
+  }
+  
+  // Close modal on click outside
+  window.onclick = function(event) {
+    const modal = document.getElementById("evidenceModal");
+    if (event.target === modal) {
+      closeEvidence();
+    }
+  }
+  
+  // Close modal on Escape key
+  document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") {
+      closeEvidence();
+    }
+  });
+  
+  console.log('Summary page loaded - Evidence functions ready');
+</script>
 </body>
 </html>
