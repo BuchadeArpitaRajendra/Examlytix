@@ -8,10 +8,12 @@ INTEGRITY_RULES = {
     "Candidate's Face is Not Visible": 2,
     "Multiple Faces are Visible": 5,
     "Face Detection Violation for Over 5s": 8,
-    "Candidate Switched to Another Tab": 5,
-    "Exam Window Lost Focus": 3,
+    "Candidate Switched to Another Tab": 5,  # This is for the FIRST switch
+    "Exam Window Lost Focus": 3,  # This is for focus loss events
     "Candidate Paused the Exam": 8,
 }
+
+# Note: "Tab Returned" events do NOT deduct points
 
 def get_latest_session(candidate_id):
     con = get_connection()

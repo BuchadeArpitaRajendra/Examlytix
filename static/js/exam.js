@@ -21,6 +21,10 @@
   let lastStatus = window.EXAM_STATUS || 'Running';
   let isWindowFocused = true;
   let isPageVisible = true;
+  let lastReportedEvent = null;
+  let eventCooldown = false;
+  let isMinimized = false;
+  let wasMinimized = false;
 
   // =============================================
   // CONFIRM END EXAM
@@ -48,9 +52,9 @@
   }
 
   function tagClassFor(eventType) {
-    if (eventType == "Face Not Detected" || eventType == "Tab Switched")
+    if (eventType == "Face Not Detected" || eventType == "Tab Switched" || eventType == "Window Minimized")
       return "bad";
-    if (eventType == "Face Detected" || eventType == "Tab Returned")
+    if (eventType == "Face Detected" || eventType == "Tab Returned" || eventType == "Window Restored")
       return "warn";
     if (eventType == "Exam Paused" || eventType == "Exam Resumed")
       return "ok";
@@ -112,7 +116,6 @@
     statusText.textContent = text;
     statusChip.classList.toggle("warn", !!warn);
     viewfinder.classList.toggle("alert-state", !!warn);
-    // Update face status text
     const faceStatusEl = document.getElementById('faceStatusText');
     if (faceStatusEl) {
       faceStatusEl.textContent = text;
@@ -146,7 +149,6 @@
       const scoreEl = document.getElementById("integrityScore");
       if (scoreEl) {
         scoreEl.textContent = data.integrity_score + "%";
-        // Update color based on score
         const score = data.integrity_score;
         if (score >= 90) {
           scoreEl.style.color = 'var(--success)';
@@ -247,18 +249,58 @@
   }
 
   // =============================================
-  // TAB EVENT HANDLING
+  // DETECT WINDOW MINIMIZATION
+  // =============================================
+  function checkWindowMinimized() {
+    // Method 1: Check if document is hidden AND window is not focused
+    // When minimized, document.hidden = true and window loses focus
+    if (document.hidden && !document.hasFocus()) {
+      isMinimized = true;
+    } else if (document.hasFocus() && !document.hidden) {
+      isMinimized = false;
+    }
+    
+    // Method 2: Check window outer dimensions (for older browsers)
+    // When minimized, outerHeight and outerWidth are very small
+    if (window.outerHeight !== undefined && window.outerWidth !== undefined) {
+      // Some browsers report 0 or very small values when minimized
+      if (window.outerHeight < 100 && window.outerWidth < 100) {
+        isMinimized = true;
+      }
+    }
+    
+    return isMinimized;
+  }
+
+  // =============================================
+  // TAB EVENT HANDLING - WITH MINIMIZATION DETECTION
   // =============================================
   function reportTabEvent(eventType, remarks) {
-    if(lastStatus !== "Running")
-      return;
+    if(lastStatus !== "Running") return;
+    
+    // Prevent duplicate events from firing too quickly
+    if (eventCooldown) return;
+    
+    // Don't report if exam is ending
+    if (examEnding) return;
+    
+    // Only report Tab Switched events (not Tab Returned) for counting
+    // But we log both for tracking purposes
     addLogRow(eventType, remarks);
+    
     const payload = {
-      event_type: eventType,
-      remarks
+        event_type: eventType,
+        remarks: remarks
     };
-    if (eventType === "Tab Switched") {
+    
+    // Only capture screenshot for Tab Switched events
+    if (eventType === "Tab Switched" || eventType === "Window Minimized") {
         payload.image = captureFrame();
+        // Set cooldown to prevent multiple rapid events
+        eventCooldown = true;
+        setTimeout(() => {
+            eventCooldown = false;
+        }, 2000); // 2 second cooldown
     }
 
     postJSON("/api/log_event", payload)
@@ -271,37 +313,141 @@
         .catch(() => {});
   }
 
-  // Tab is Hidden or Become Visible Again
+  // Tab is Hidden (Tab Switch or Minimization detected)
   document.addEventListener("visibilitychange", function () {
-    if (examEnding)
-      return;
+    if (examEnding) return;
+    
+    const wasHidden = !isPageVisible;
     isPageVisible = !document.hidden;
+    
+    // Check if window is minimized
+    const minimized = checkWindowMinimized();
+    
+    // If window was minimized before and now restored
+    if (wasMinimized && !minimized && !document.hidden) {
+      // Window was restored
+      reportTabEvent("Window Restored", "Window Restored from Minimized");
+      wasMinimized = false;
+      lastReportedEvent = null;
+      return;
+    }
+    
+    // If document became hidden
     if (document.hidden) {
-      reportTabEvent("Tab Switched", "Candidate Switched to Another Tab");
+      // Check if it's actually minimized (not just tab switch)
+      if (minimized) {
+        wasMinimized = true;
+        if (lastReportedEvent !== 'minimized' && lastReportedEvent !== 'tab_switch') {
+          reportTabEvent("Window Minimized", "Candidate Minimized the Window");
+          lastReportedEvent = 'minimized';
+        }
+      } else {
+        // Just tab switch
+        if (lastReportedEvent !== 'tab_switch' && lastReportedEvent !== 'minimized') {
+          reportTabEvent("Tab Switched", "Candidate Switched to Another Tab");
+          lastReportedEvent = 'tab_switch';
+        }
+      }
     } else {
-      reportTabEvent("Tab Returned", "Candidate Returned to the Exam Tab");
+      // Tab became visible again (returned)
+      if (lastReportedEvent === 'tab_switch' || lastReportedEvent === 'minimized') {
+        reportTabEvent("Tab Returned", "Candidate Returned to the Exam Tab");
+        setTimeout(() => {
+          lastReportedEvent = null;
+        }, 3000);
+      }
     }
   });
 
-  // Tab Loses or Gains Focus
+  // Tab Loses Focus (Blur event - also fires on minimization)
   window.addEventListener("blur", function () {
-    if (examEnding)
-      return;
+    if (examEnding) return;
+    
+    // Check if minimized
+    const minimized = checkWindowMinimized();
+    
     if (isWindowFocused) {
       isWindowFocused = false;
-      if (isPageVisible) {
+      
+      // If minimized, report as window minimized
+      if (minimized) {
+        wasMinimized = true;
+        if (lastReportedEvent !== 'minimized' && lastReportedEvent !== 'tab_switch') {
+          reportTabEvent("Window Minimized", "Candidate Minimized the Window");
+          lastReportedEvent = 'minimized';
+        }
+      } else if (isPageVisible && lastReportedEvent !== 'tab_switch' && lastReportedEvent !== 'minimized') {
+        // Only report if page is visible and we haven't already reported
         reportTabEvent("Tab Switched", "Exam Window Lost Focus");
+        lastReportedEvent = 'tab_switch';
       }
     }
   });
+
+  // Tab Gains Focus (Focus event)
   window.addEventListener("focus", function () {
-    if (examEnding)
-      return;
+    if (examEnding) return;
+    
+    // Check if minimized
+    const minimized = checkWindowMinimized();
+    
     if (!isWindowFocused) {
       isWindowFocused = true;
-      if (isPageVisible) {
+      
+      // If was minimized and now restored
+      if (wasMinimized && !minimized && isPageVisible) {
+        reportTabEvent("Window Restored", "Window Restored from Minimized");
+        wasMinimized = false;
+        setTimeout(() => {
+          lastReportedEvent = null;
+        }, 3000);
+      } else if (isPageVisible) {
         reportTabEvent("Tab Returned", "Exam Window Active Again");
+        setTimeout(() => {
+          lastReportedEvent = null;
+        }, 3000);
       }
+    }
+  });
+
+  // =============================================
+  // PERIODIC MINIMIZATION CHECK (Backup detection)
+  // =============================================
+  setInterval(function() {
+    if (examEnding) return;
+    
+    const minimized = checkWindowMinimized();
+    
+    // If minimized state changed
+    if (minimized && !wasMinimized && isPageVisible) {
+      // Window just got minimized
+      wasMinimized = true;
+      if (lastReportedEvent !== 'minimized') {
+        reportTabEvent("Window Minimized", "Candidate Minimized the Window");
+        lastReportedEvent = 'minimized';
+      }
+    } else if (!minimized && wasMinimized) {
+      // Window just got restored
+      wasMinimized = false;
+      if (lastReportedEvent === 'minimized') {
+        reportTabEvent("Window Restored", "Window Restored from Minimized");
+        setTimeout(() => {
+          lastReportedEvent = null;
+        }, 3000);
+      }
+    }
+  }, 2000); // Check every 2 seconds
+
+  // =============================================
+  // PAGE UNLOAD HANDLER
+  // =============================================
+  window.addEventListener('beforeunload', function() {
+    if (!examEnding && lastStatus === 'Running') {
+      // Try to log that user is leaving
+      navigator.sendBeacon('/api/log_event', JSON.stringify({
+        event_type: 'Tab Switched',
+        remarks: 'Page Unloaded (User may have closed the browser)'
+      }));
     }
   });
 
@@ -312,4 +458,5 @@
   renderLog();
   fetchIntegrityScore();
 
+  console.log('Exam monitoring initialized with window minimization detection');
 })();

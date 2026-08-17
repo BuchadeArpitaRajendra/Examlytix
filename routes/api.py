@@ -134,10 +134,17 @@ def api_log_event():
     event_type = payload.get("event_type", "Unknown Event")
     remarks = payload.get("remarks", "")
     image_data = payload.get("image")
+    
     state = database.get_monitor_state(session_id)
+    
+    # Only increment tab switches for ACTUAL tab switches (not returns)
     if event_type == "Tab Switched":
         database.increment_tab_switch(session_id)
         state = database.get_monitor_state(session_id)
+    
+    # For Tab Returned events, DO NOT increment tab switches
+    # We still log the event for tracking but don't count it
+    
     screenshot_path = None
     if event_type == "Tab Switched" and image_data:
         screenshot_path = save_screenshot(
@@ -145,13 +152,14 @@ def api_log_event():
             image_data,
             "browser_focus_lost"
         )
-        # The save_screenshot function now returns a relative path
+    
     database.log_event(
         session["candidate_id"], session_id, event_type, remarks, screenshot_path
     )
+    
     return jsonify({
         "success": True,
-        "tab_switches": state["total_tab_switches"]
+        "tab_switches": state["total_tab_switches"] if state else 0
     })
 
 @app.route("/api/integrity_score")
