@@ -84,6 +84,51 @@ def admin_dashboard():
             if integrity_scores else 0
         ),
     }
+    
+    # Get risk distribution for pie chart
+    risk_distribution = {
+        "Low": 0,
+        "Medium": 0,
+        "High": 0,
+        "Critical": 0
+    }
+    
+    # Get students by risk category
+    students_by_risk = {
+        "Low": [],
+        "Medium": [],
+        "High": [],
+        "Critical": []
+    }
+    
+    # Get latest session for each candidate
+    for candidate in candidates:
+        latest_session = database.get_latest_session(candidate["candidate_id"])
+        if latest_session and latest_session["integrity_score"] is not None:
+            score = latest_session["integrity_score"]
+            # Determine risk category
+            if score >= 90:
+                risk_category = "Low"
+            elif score >= 75:
+                risk_category = "Medium"
+            elif score >= 50:
+                risk_category = "High"
+            else:
+                risk_category = "Critical"
+            
+            risk_distribution[risk_category] += 1
+            students_by_risk[risk_category].append({
+                "candidate_id": candidate["candidate_id"],
+                "name": candidate["name"],
+                "email": candidate["email"],
+                "integrity_score": score,
+                "risk_category": risk_category,
+                "session_id": latest_session["session_id"]
+            })
+    
+    analytics["risk_distribution"] = risk_distribution
+    analytics["students_by_risk"] = students_by_risk
+    
     analytics["event_distribution"] = {
         "Face Not Detected": analytics["face_absence_events"],
         "Face Detected": analytics["face_detected_events"],

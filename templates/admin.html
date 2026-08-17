@@ -134,6 +134,35 @@
           </div>
         </div>
 
+        <!-- Risk Distribution Pie Chart -->
+        <div style="margin-top: var(--spacing-xl);">
+          <p class="eyebrow" style="margin-bottom:16px;">
+            <i class="bi bi-pie-chart-fill"></i> Integrity Risk Distribution
+          </p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+            <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border);">
+              <canvas id="riskPieChart" style="max-height: 300px; max-width: 100%;"></canvas>
+            </div>
+            <div style="background: var(--bg-alt); border-radius: var(--radius-lg); padding: var(--spacing-lg); border: 1px solid var(--border);">
+              <div id="riskStudentList">
+                <div style="text-align: center; color: var(--text-muted); padding: 20px 0;">
+                  <i class="bi bi-hand-index" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
+                  <p>Click on any pie chart segment to view students</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Legend -->
+        <div style="display: flex; gap: var(--spacing-lg); flex-wrap: wrap; margin-top: var(--spacing-md); padding: var(--spacing-md); background: var(--bg-alt); border-radius: var(--radius); border: 1px solid var(--border);">
+          <span class="legend-title"><i class="bi bi-key"></i> Risk Levels</span>
+          <span><span class="legend-dot" style="background: var(--success);"></span> Low Risk (≥90)</span>
+          <span><span class="legend-dot" style="background: var(--warning);"></span> Medium Risk (75-89)</span>
+          <span><span class="legend-dot" style="background: var(--danger);"></span> High Risk (50-74)</span>
+          <span><span class="legend-dot" style="background: #dc2626;"></span> Critical (&lt;50)</span>
+        </div>
+
         <!-- ============================================ -->
         <!-- CANDIDATES TAB -->
         <!-- ============================================ -->
@@ -504,6 +533,184 @@ function showEvidence(screenshotPath, eventId, timestamp) {
   
   document.addEventListener("keydown", function(event) {
     if (event.key === "Escape") closeEvidence();
+  });
+  
+  // RISK PIE CHART
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('riskPieChart');
+    if (!ctx) {
+      console.error('Risk pie chart canvas not found');
+      return;
+    }
+    
+    const riskData = {{ analytics.risk_distribution|tojson }};
+    const studentsByRisk = {{ analytics.students_by_risk|tojson }};
+    
+    // Colors for each risk level
+    const colors = {
+      'Low': 'rgba(52, 211, 153, 0.8)',
+      'Medium': 'rgba(251, 191, 36, 0.8)',
+      'High': 'rgba(248, 113, 113, 0.8)',
+      'Critical': 'rgba(220, 38, 38, 0.8)'
+    };
+    
+    const borderColors = {
+      'Low': 'rgba(52, 211, 153, 1)',
+      'Medium': 'rgba(251, 191, 36, 1)',
+      'High': 'rgba(248, 113, 113, 1)',
+      'Critical': 'rgba(220, 38, 38, 1)'
+    };
+    
+    // Prepare data for chart
+    const labels = Object.keys(riskData);
+    const values = labels.map(key => riskData[key]);
+    const backgroundColors = labels.map(key => colors[key]);
+    const borderColorsList = labels.map(key => borderColors[key]);
+    
+    // Create pie chart
+    const chart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: backgroundColors,
+          borderColor: borderColorsList,
+          borderWidth: 2,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#e5e7eb',
+              padding: 10,
+              font: {
+                size: 12
+              },
+              generateLabels: function(chart) {
+                const data = chart.data;
+                return data.labels.map(function(label, i) {
+                  const value = data.datasets[0].data[i];
+                  return {
+                    text: label + ' (' + value + ')',
+                    fillStyle: data.datasets[0].backgroundColor[i],
+                    strokeStyle: data.datasets[0].borderColor[i],
+                    index: i
+                  };
+                });
+              }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.parsed || 0;
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                return label + ': ' + value + ' (' + percentage + '%)';
+              }
+            }
+          }
+        },
+        onClick: function(event, elements) {
+          if (elements.length > 0) {
+            const index = elements[0].index;
+            const riskCategory = this.data.labels[index];
+            showStudentsByRisk(riskCategory);
+          }
+        }
+      }
+    });
+    
+    // Function to show students by risk category
+    window.showStudentsByRisk = function(riskCategory) {
+      const listContainer = document.getElementById('riskStudentList');
+      if (!listContainer) return;
+      
+      const students = {{ analytics.students_by_risk|tojson }};
+      const studentsList = students[riskCategory] || [];
+      
+      if (studentsList.length === 0) {
+        listContainer.innerHTML = `
+          <div style="text-align: center; color: var(--text-muted); padding: 20px 0;">
+            <i class="bi bi-people" style="font-size: 32px; display: block; margin-bottom: 10px;"></i>
+            <p>No students in <strong>${riskCategory}</strong> risk category</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // Get color for this risk category
+      const colors = {
+        'Low': 'var(--success)',
+        'Medium': 'var(--warning)',
+        'High': 'var(--danger)',
+        'Critical': '#dc2626'
+      };
+      
+      const riskColor = colors[riskCategory] || 'var(--text)';
+      
+      let html = `
+        <div style="margin-bottom: 12px;">
+          <h4 style="color: ${riskColor}; margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: ${riskColor};"></span>
+            ${riskCategory} Risk Students (${studentsList.length})
+          </h4>
+        </div>
+        <div style="max-height: 300px; overflow-y: auto;">
+          <table class="admin-compact-table" style="width: 100%;">
+            <thead>
+              <tr>
+                <th style="width: 25%;">ID</th>
+                <th style="width: 35%;">Name</th>
+                <th style="width: 25%;">Score</th>
+                <th style="width: 15%;">Risk</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      studentsList.forEach(student => {
+        const scoreColor = student.integrity_score >= 90 ? 'var(--success)' :
+                          student.integrity_score >= 75 ? 'var(--warning)' :
+                          student.integrity_score >= 50 ? 'var(--danger)' : '#dc2626';
+        
+        html += `
+          <tr>
+            <td style="font-size: 12px; font-weight: 600;">${student.candidate_id}</td>
+            <td style="font-size: 12px;">${student.name}</td>
+            <td style="font-size: 12px; font-weight: 600; color: ${scoreColor};">${student.integrity_score}/100</td>
+            <td>
+              <span class="badge ${riskCategory === 'Low' ? 'badge-completed' : riskCategory === 'Medium' ? 'badge-paused' : 'badge-running'}" style="font-size: 8px; padding: 1px 8px;">
+                ${riskCategory}
+              </span>
+            </td>
+          </tr>
+        `;
+      });
+      
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      listContainer.innerHTML = html;
+    };
+    
+    // Auto-select Low risk on load if there are students
+    const lowRiskStudents = {{ analytics.students_by_risk.Low|tojson }};
+    if (lowRiskStudents && lowRiskStudents.length > 0) {
+      setTimeout(function() {
+        showStudentsByRisk('Low');
+      }, 500);
+    }
   });
 </script>
 
